@@ -1,0 +1,583 @@
+
+
+CREATE TABLE public.orgao (
+	id_orgao SERIAL PRIMARY KEY NOT NULL,
+	tipoRegistro_orgao        numeric(02) NOT NULL,
+	codigo_orgao              numeric(02) NOT NULL,
+	cpfGestor_orgao           numeric(11) NOT NULL,
+	dataInicio_orgao          timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+	dataFinal_orgao           timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+	desc_orgao                character varying(50) NOT NULL,
+	tipo_orgao                numeric(02) NOT NULL,
+	cnpj_orgao                numeric(14) NOT NULL,
+	nomeGestor_orgao          character varying(50) NOT NULL,
+	cargoGestor_orgao         character varying(50) NOT NULL,
+	lograResGestor_orgao      character varying(50) NOT NULL,
+	setorLograGestor_orgao    character varying(20) NOT NULL,
+	cidadeLograGestor_orgao   character varying(20) NOT NULL,
+	ufCidadeLograGestor_orgao character varying(02) NOT NULL,
+	cepLograGestor_orgao      numeric(07) NOT NULL,
+	foneGestor_orgao          numeric(08) NOT NULL,
+	emailGestor_orgao         character varying(100) NOT NULL,
+	nroSequencial_orgao       numeric(06) NOT NULL
+)
+
+CREATE TABLE public.softgestao (
+	id_softGestao SERIAL PRIMARY KEY NOT NULL,
+	tipoRegistro_softGestao              numeric(02) NOT NULL,
+	cpfCnpjProprietario_softGestao       numeric(14) NOT NULL,
+	tipoPessoa_softGestao                numeric(01) NOT NULL,
+	nomeRazaoSocial_softGestao           character varying(100) NOT NULL,
+	lograProprietario_softGestao         character varying(50) NOT NULL,
+	setorLograProprietario_softGestao     character varying(20) NOT NULL,
+	cidadeLograProprietario_softGestao   character varying(20) NOT NULL,
+	ufLograProprietario_softGestao       character varying(02) NOT NULL,
+	cepLograProprietario_softGestao      numeric(08) NOT NULL,
+	foneProprietario_softGestao          numeric(10) NOT NULL,
+	emailProprietario_softGestao         character varying(80) NOT NULL,
+	cpfRespTecnico_softGestao            numeric(11) NOT NULL,
+	nomeRespTecnico_softGestao           character varying(50) NOT NULL,
+	emailRespTecnico_softGestao          character varying(100) NOT NULL,
+	nomeSistema_softGestao               character varying(50) NOT NULL,
+	versaoSistema_softGestao             character varying(10) NOT NULL,
+	possuiPortalTransparencia_softGestao boolean NOT NULL,
+	urlPortalTransparencia_softGestao    character varying(100) NOT NULL,
+	possuiSistemaIntegrado_softGestao    boolean NOT NULL,
+	disponibilizaDespesa_softGestao      boolean NOT NULL,
+	disponibilizaReceita_softGestao      boolean NOT NULL,
+	nroSequencial_softGestao             numeric(06) NOT NULL
+)
+
+CREATE TABLE public.isi
+(
+    id_isi SERIAL PRIMARY KEY NOT NULL,
+    "10" jsonb NOT NULL,
+    data character varying(4) COLLATE pg_catalog."default" NOT NULL
+)
+
+
+
+
+CREATE TABLE public.uoc
+(
+    id_uoc SERIAL PRIMARY KEY NOT NULL,
+    "10" jsonb NOT NULL,
+    "11" jsonb NOT NULL,
+    "12" jsonb NOT NULL,
+    "13" jsonb NOT NULL,
+    "14" jsonb NOT NULL,
+    data character varying(4) COLLATE pg_catalog."default" NOT NULL
+)
+
+CREATE TABLE public.rec
+(
+    id_rec SERIAL PRIMARY KEY NOT NULL,
+    "10" jsonb NOT NULL,
+    "11" jsonb NOT NULL,
+    "12" jsonb NOT NULL,
+    data character varying(4) COLLATE pg_catalog."default" NOT NULL
+)
+
+CREATE TABLE public.are
+(
+    id_are SERIAL PRIMARY KEY NOT NULL,
+    "10" jsonb NOT NULL,
+    "11" jsonb NOT NULL,
+    "12" jsonb NOT NULL,
+    data character varying(4) COLLATE pg_catalog."default" NOT NULL
+)
+
+CREATE TABLE public.aoc
+(
+    id_aoc SERIAL PRIMARY KEY NOT NULL,
+    "10" jsonb NOT NULL,
+    "11" jsonb NOT NULL,
+    "12" jsonb NOT NULL,
+    "90" jsonb NOT NULL,
+    "91" jsonb NOT NULL,
+    "92" jsonb NOT NULL,
+    "93" jsonb NOT NULL,
+    "94" jsonb NOT NULL,
+    data character varying(4) COLLATE pg_catalog."default" NOT NULL
+)
+
+CREATE TABLE public.eoc
+(
+    id_eoc SERIAL PRIMARY KEY NOT NULL,
+    "10" jsonb NOT NULL,
+    "11" jsonb NOT NULL,
+    "12" jsonb NOT NULL,
+    data character varying(4) COLLATE pg_catalog."default" NOT NULL
+)
+
+
+
+
+
+CREATE TABLE public.cob
+(
+    id_cob SERIAL PRIMARY KEY NOT NULL,
+    "10" jsonb NOT NULL,
+    data character varying(4) COLLATE pg_catalog."default" NOT NULL
+)
+
+CREATE TABLE public.emp
+(
+    id_emp SERIAL PRIMARY KEY NOT NULL,
+    "10" jsonb NOT NULL,
+    "11" jsonb NOT NULL,
+    "12" jsonb NOT NULL,
+    "13" jsonb NOT NULL,
+    "14" jsonb NOT NULL,
+    data character varying(4) COLLATE pg_catalog."default" NOT NULL
+)
+
+CREATE TABLE public.anl
+(
+    id_anl SERIAL PRIMARY KEY NOT NULL,
+    "10" jsonb NOT NULL,
+    "11" jsonb NOT NULL,
+    "12" jsonb NOT NULL,
+    "13" jsonb NOT NULL,
+    "14" jsonb NOT NULL,
+    data character varying(4) COLLATE pg_catalog."default" NOT NULL
+)
+
+CREATE TABLE public.eoc
+(
+    id_eoc SERIAL PRIMARY KEY NOT NULL,
+    "10" jsonb NOT NULL,
+    "11" jsonb NOT NULL,
+    "12" jsonb NOT NULL,
+    data character varying(4) COLLATE pg_catalog."default" NOT NULL
+)
+
+
+
+
+CREATE TABLE public.anl (
+	id_anl SERIAL PRIMARY KEY NOT NULL,
+	10 jsonb,
+	11 jsonb,
+	12 jsonb,
+	13 jsonb,
+	data character varying(4)
+)
+
+CREATE TABLE public.gestor (
+	id_gestor SERIAL PRIMARY KEY NOT NULL,
+	tipoRegistro_gestor          numeric(02) NOT NULL,
+	codOrgao_gestor              numeric(02) NOT NULL,
+	codUnidade_gestor            numeric(02) NOT NULL,
+	cpfOrdenadorDespesa_gestor   numeric(11) NOT NULL,
+	dataInicio_gestor            timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    tipoResponsavel_gestor       numeric(01) NOT NULL,
+	datafim_gestor               timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    nomeOrdenadorDespesa_gestor  character varying(50) NOT NULL,
+    cargoOrdenadorDespesa_gestor character varying(50) NOT NULL,
+    lograResOrdenador_gestor     character varying(50) NOT NULL,
+    setorLograOrdenador_gestor   character varying(20) NOT NULL,
+    cidadeLograOrdenador_gestor  character varying(20) NOT NULL,
+    ufCidadeLograOrdendor_gestor character varying(02) NOT NULL,
+    cepLograOrdenador_gestor     numeric(08) NOT NULL,
+    foneOrdenador_gestor         numeric(10) NOT NULL,
+    email_gestor                 character varying(80) NOT NULL,
+    escolaridade_gestor          numeric(02) NOT NULL,
+    nroSequencial_gestor         numeric(06) NOT NULL
+)
+
+CREATE TABLE public.contador (
+	id_contador SERIAL PRIMARY KEY NOT NULL,
+	tipoRegistro_contador            numeric(02) NOT NULL,
+	codOrgao_contador                numeric(02) NOT NULL,
+	codUnidade_contador              numeric(02) NOT NULL,
+	cpf_contador                     numeric(11) NOT NULL,
+	dtInicio_contador                timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+	dtFinal_contador                 timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    nome_contador                    character varying(50) NOT NULL,
+    crc_contador                     character varying(11) NOT NULL,
+    ufCrc_contador                   character varying(02) NOT NULL,
+    provimento_contador              numeric(02) NOT NULL,
+    cnpjEmpresaTerceirizada_contador numeric(14) NOT NULL,
+    razaoSocialTerceirizada_contador character varying(80) NOT NULL,
+    lograRes_contador                character varying(50) NOT NULL,
+    setorLogra_contador              character varying(20) NOT NULL,
+    cidadeLogra_contador             character varying(20) NOT NULL,
+    ufCidadeLogra_contador           character varying(02) NOT NULL,
+    cepLogra_contador                numeric(08) NOT NULL,
+    fone_contador                    numeric(10) NOT NULL,
+    email_contador                   character varying(80) NOT NULL,
+    escolaridade_contador            numeric(02) NOT NULL,
+    nroSequencial_contador           numeric(06) NOT NULL
+)
+
+CREATE TABLE public.controle (
+	id_controle SERIAL PRIMARY KEY NOT NULL,
+	tipoRegistro_controle            numeric(02) NOT NULL,
+	codOrgao_controle                numeric(02) NOT NULL,
+	codUnidade_controle              numeric(02) NOT NULL,
+	cpf_controle                     numeric(11) NOT NULL,
+	dtInicio_controle                timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+	dtFinal_controle                 timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    nome_controle                    character varying(50) NOT NULL,
+    lograRes_controle                character varying(50) NOT NULL,
+    setorLogra_controle              character varying(20) NOT NULL,
+    cidadeLogra_controle             character varying(20) NOT NULL,
+    ufCidadeLogra_controle           character varying(02) NOT NULL,
+    cepLogra_controle                numeric(08) NOT NULL,
+    fone_controle                    numeric(10) NOT NULL,
+    email_controle                   character varying(80) NOT NULL,
+    escolaridade_controle            numeric(02) NOT NULL,
+    nroSequencial_controle           numeric(06) NOT NULL
+)
+
+CREATE TABLE public.juridico (
+	id_juridico SERIAL PRIMARY KEY NOT NULL,
+	tipoRegistro_juridico            numeric(02) NOT NULL,
+	codOrgao_juridico                numeric(02) NOT NULL,
+	codUnidade_juridico              numeric(02) NOT NULL,
+	cpf_juridico                     numeric(11) NOT NULL,
+	dtInicio_juridico                timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+	dtFinal_juridico                 timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    nome_juridico                    character varying(50) NOT NULL,
+    oab_juridico                     character varying(08) NOT NULL,
+    ufOab_juridico                   character varying(02) NOT NULL,
+    provimento_juridico              numeric(02) NOT NULL,
+    cnpjEmpresaTerceirizada_juridico numeric(14) NOT NULL,
+    razaoSocialTerceirizada_juridico character varying(80) NOT NULL,
+    lograRes_juridico                character varying(50) NOT NULL,
+    setorLogra_juridico              character varying(20) NOT NULL,
+    cidadeLogra_juridico             character varying(20) NOT NULL,
+    ufCidadeLogra_juridico           character varying(02) NOT NULL,
+    cepLogra_juridico                numeric(08) NOT NULL,
+    fone_juridico                    numeric(10) NOT NULL,
+    email_juridico                   character varying(80) NOT NULL,
+    nroSequencial_juridico           numeric(06) NOT NULL
+)
+
+CREATE TABLE public.receita (
+	id_receita SERIAL PRIMARY KEY NOT NULL,
+	10 jsonb,
+	11 jsonb,
+	12 jsonb,
+	data character varying(4)
+)
+
+CREATE TABLE public.receita (
+	id_receita SERIAL PRIMARY KEY NOT NULL,
+	tipoRegistro_receita         numeric(02) NOT NULL,
+	codOrgao_receita             numeric(02) NOT NULL,
+	codUnidade_receita           numeric(02) NOT NULL,
+)
+
+CREATE TABLE public.movReceita (
+	id_movReceita SERIAL PRIMARY KEY NOT NULL,
+	tipoRegistro_movReceita          numeric(02) NOT NULL,
+	codOrgao_movReceita              numeric(02) NOT NULL,
+	codUnidade_movReceita            numeric(02) NOT NULL,
+	rubrica_movReceita               numeric(09) NOT NULL,
+	banco_movReceita                 numeric(03) NOT NULL,
+	agencia_movReceita               numeric(04) NOT NULL,
+	contaCorrente_movReceita         numeric(12) NOT NULL,
+	contaCorrenteDigVerif_movReceita numeric(01) NOT NULL,
+	tipoConta_movReceita             numeric(02) NOT NULL,
+	vlRecolhimento_movReceita        numeric(11,02) NOT NULL,
+    nroSequencial_movReceita         numeric(06) NOT NULL
+)
+
+CREATE TABLE public.fonteRecReceita (
+	id_fonteRecReceita SERIAL PRIMARY KEY NOT NULL,
+	tipoRegistro_fonteRecReceita          numeric(02) NOT NULL,
+	codOrgao_fonteRecReceita              numeric(02) NOT NULL,
+	codUnidade_fonteRecReceita            numeric(02) NOT NULL,
+	rubrica_fonteRecReceita               numeric(09) NOT NULL,
+	banco_fonteRecReceita                 numeric(03) NOT NULL,
+	agencia_fonteRecReceita               numeric(04) NOT NULL,
+	contaCorrente_fonteRecReceita         numeric(12) NOT NULL,
+	contaCorrenteDigVerif_fonteRecReceita numeric(01) NOT NULL,
+	tipoConta_fonteRecReceita             numeric(02) NOT NULL,
+	codFonteRecurso_fonteRecReceita       numeric(06) NOT NULL,
+	vlFonteRecurso_fonteRecReceita        numeric(11,02) NOT NULL,
+    nroSequencial_fonteRecReceita         numeric(06) NOT NULL
+)
+
+CREATE TABLE public.anulacaoReceita (
+	id_anulacaoReceita SERIAL PRIMARY KEY NOT NULL,
+	tipoRegistro_anulacaoReceita  numeric(02) NOT NULL,
+	codOrgao_anulacaoReceita      numeric(02) NOT NULL,
+	codUnidade_anulacaoReceita    numeric(02) NOT NULL,
+	rubrica_anulacaoReceita       numeric(09) NOT NULL,
+	vlAnulacao_anulacaoReceita    numeric(11,02) NOT NULL,
+	justificativa_anulacaoReceita numeric(04) NOT NULL,
+    nroSequencial_anulacaoReceita numeric(06) NOT NULL
+)
+
+CREATE TABLE public.anulacaoReceitaConta (
+	id_anulacaoReceitaConta SERIAL PRIMARY KEY NOT NULL,
+	tipoRegistro_anulacaoReceitaConta          numeric(02) NOT NULL,
+	codOrgao_anulacaoReceitaConta              numeric(02) NOT NULL,
+	codUnidade_anulacaoReceitaConta            numeric(02) NOT NULL,
+	rubrica_anulacaoReceitaConta               numeric(09) NOT NULL,
+	banco_anulacaoReceitaConta                 numeric(03) NOT NULL,
+	agencia_anulacaoReceitaConta               numeric(04) NOT NULL,
+	contaCorrente_anulacaoReceitaConta         numeric(12) NOT NULL,
+	contaCorrenteDigVerif_anulacaoReceitaConta numeric(01) NOT NULL,
+	tipoConta_anulacaoReceitaConta             numeric(02) NOT NULL,
+	vlAnulacao_anulacaoReceitaConta            numeric(11,02) NOT NULL,
+    nroSequencial_anulacaoReceitaConta         numeric(06) NOT NULL
+)
+
+CREATE TABLE public.movReceitaFontRecurso (
+	id_movReceitaFontRecurso SERIAL PRIMARY KEY NOT NULL,
+	tipoRegistro_movReceitaFontRecurso          numeric(02) NOT NULL,
+	codOrgao_movReceitaFontRecurso              numeric(02) NOT NULL,
+	codUnidade_movReceitaFontRecurso            numeric(02) NOT NULL,
+	rubrica_movReceitaFontRecurso               numeric(09) NOT NULL,
+	banco_movReceitaFontRecurso                 numeric(03) NOT NULL,
+	agencia_movReceitaFontRecurso               numeric(04) NOT NULL,
+	contaCorrente_movReceitaFontRecurso         numeric(12) NOT NULL,
+	contaCorrenteDigVerif_movReceitaFontRecurso numeric(01) NOT NULL,
+	tipoConta_movReceitaFontRecurso             numeric(02) NOT NULL,
+	codFonteRecurso_movReceitaFontRecurso       numeric(06) NOT NULL,
+	vlAnuladoFonteRecurso_movReceitaFontRecurso numeric(11,02) NOT NULL,
+    nroSequencial_movReceitaFontRecurso         numeric(06) NOT NULL
+)
+
+CREATE TABLE public.aoc (
+	id_aoc SERIAL PRIMARY KEY NOT NULL,
+	tipoRegistro_aoc     numeric(02) NOT NULL,
+	codPrograma_aoc      numeric(04) NOT NULL,
+	codOrgao_aoc         numeric(02) NOT NULL,
+	codUnidade_aoc       numeric(02) NOT NULL,
+	codFuncao_aoc        numeric(02) NOT NULL,
+	codSubFuncao_aoc     numeric(03) NOT NULL,
+	naturezaAcao_aoc     numeric(01) NOT NULL,
+	nroProjAtiv_aoc      numeric(03) NOT NULL,
+	vlSaldoAntOrcado_aoc numeric(11,02) NOT NULL,
+	vlSaldoAtual_aoc     numeric(11,02) NOT NULL,
+    nroSequencial_aoc    numeric(06) NOT NULL
+)
+
+CREATE TABLE public.aocElementoDespesa (
+	id_aocElementoDespesa SERIAL PRIMARY KEY NOT NULL,
+	tipoRegistro_aocElementoDespesa         numeric(02) NOT NULL,
+	codPrograma_aocElementoDespesa          numeric(04) NOT NULL,
+	codOrgao_aocElementoDespesa             numeric(02) NOT NULL,
+	codUnidade_aocElementoDespesa           numeric(02) NOT NULL,
+	codFuncao_aocElementoDespesa            numeric(02) NOT NULL,
+	codSubFuncao_aocElementoDespesa         numeric(03) NOT NULL,
+	naturezaAcao_aocElementoDespesa         numeric(01) NOT NULL,
+	nroProjAtiv_aocElementoDespesa          numeric(03) NOT NULL,
+	codNaturezaDaDespesa_aocElementoDespesa numeric(06) NOT NULL,
+	dataAlteracao_aocElementoDespesa        timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+	nrAlteracao_aocElementoDespesa          numeric(03) NOT NULL,
+	tipoAlteracao_aocElementoDespesa        numeric(02) NOT NULL,
+	vlAlteracao_aocElementoDespesa          numeric(11,02) NOT NULL,
+	vlSaldoAntDotacao_aocElementoDespesa    numeric(11,02) NOT NULL,
+	vlSaldoAtual_aocElementoDespesa         numeric(11,02) NOT NULL,
+    nroSequencial_aocElementoDespesa        numeric(06) NOT NULL
+)
+
+CREATE TABLE public.aocFonteRecurso (
+	id_aocFonteRecurso SERIAL PRIMARY KEY NOT NULL,
+	tipoRegistro_aocFonteRecurso         numeric(02) NOT NULL,
+	codPrograma_aocFonteRecurso          numeric(04) NOT NULL,
+	codOrgao_aocFonteRecurso             numeric(02) NOT NULL,
+	codUnidade_aocFonteRecurso           numeric(02) NOT NULL,
+	codFuncao_aocFonteRecurso            numeric(02) NOT NULL,
+	codSubFuncao_aocFonteRecurso         numeric(03) NOT NULL,
+	naturezaAcao_aocFonteRecurso         numeric(01) NOT NULL,
+	nroProjAtiv_aocFonteRecurso          numeric(03) NOT NULL,
+	codNaturezaDaDespesa_aocFonteRecurso numeric(06) NOT NULL,
+	dataAlteracao_aocFonteRecurso        timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+	nrAlteracao_aocFonteRecurso          numeric(03) NOT NULL,
+	tipoAlteracao_aocFonteRecurso        numeric(02) NOT NULL,
+	codFontRecursos_aocFonteRecurso      numeric(03) NOT NULL,
+	vlAlteracaoFonte_aocFonteRecurso     numeric(11,02) NOT NULL,
+	vlSaldoAntFonte_aocFonteRecurso      numeric(11,02) NOT NULL,
+	vlSaldoAtualFonte_aocFonteRecurso    numeric(11,02) NOT NULL,
+    nroSequencial_aocFonteRecurso        numeric(06) NOT NULL
+)
+
+CREATE TABLE public.suplementacao (
+	id_suplementacao SERIAL PRIMARY KEY NOT NULL,
+	tipoRegistro_suplementacao              numeric(02) NOT NULL,
+	nrLeiSuplementacao_suplementacao        numeric(02) NOT NULL,
+	dataLeiSuplementacao_suplementacao      numeric(02) NOT NULL,
+	vlAutorizadoSuplementacao_suplementacao numeric(11,02) NOT NULL,
+    nroSequencial_suplementacao             numeric(06) NOT NULL
+)
+
+CREATE TABLE public.creditoEspecial (
+	id_creditoEspecial SERIAL PRIMARY KEY NOT NULL,
+	tipoRegistro_creditoEspecial           numeric(02) NOT NULL,
+	nrLeiCreditoEsp_creditoEspecial        numeric(06) NOT NULL,
+	dataLeiCreditoEsp_creditoEspecial      timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+	vlAutorizadoCreditoEsp_creditoEspecial numeric(11,02) NOT NULL,
+    nroSequencial_creditoEspecial          numeric(06) NOT NULL
+)
+
+CREATE TABLE public.realocacaoRecurso (
+	id_realocacaoRecurso SERIAL PRIMARY KEY NOT NULL,
+	tipoRegistro_realocacaoRecurso          numeric(02) NOT NULL,
+	nrLeiRealocRec_realocacaoRecurso        numeric(06) NOT NULL,
+	dataLeiRealocRec_realocacaoRecurso      timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+	vlAutorizadoRealocRec_realocacaoRecurso numeric(11,02) NOT NULL,
+    nroSequencial_realocacaoRecurso         numeric(06) NOT NULL
+)
+
+CREATE TABLE public.alteraPPA (
+	id_alteraPPA SERIAL PRIMARY KEY NOT NULL,
+	tipoRegistro_alteraPPA  numeric(02) NOT NULL,
+	nrLeiAltPPA_alteraPPA   numeric(06) NOT NULL,
+	dataLeiAltPPA_alteraPPA timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    nroSequencial_alteraPPA numeric(06) NOT NULL
+)
+
+CREATE TABLE public.aberCreditoAdicional (
+	id_aberCreditoAdicional SERIAL PRIMARY KEY NOT NULL,
+	tipoRegistro_aberCreditoAdicional  numeric(02) NOT NULL,
+	nrDecreto_aberCreditoAdicional     numeric(06) NOT NULL,
+	dataDecreto_aberCreditoAdicional   timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+	vlDecreto_aberCreditoAdicional     numeric(11,02) NOT NULL,
+	tipoCredito_aberCreditoAdicional   numeric(01) NOT NULL,
+    nroSequencial_aberCreditoAdicional numeric(06) NOT NULL
+)
+
+CREATE TABLE public.obra (
+	id_obra SERIAL PRIMARY KEY NOT NULL,
+	tipoRegistro_obra   numeric(02) NOT NULL,
+	codOrgao_obra       numeric(02) NOT NULL,
+	codUnidade_obra     numeric(02) NOT NULL,
+	codObra_obra        numeric(04) NOT NULL,
+	anoObra_obra        numeric(04) NOT NULL,
+	especificacao_obra  character varying(100) NOT NULL,
+	latitude_obra       numeric(08) NOT NULL,
+	longitude_obra      numeric(08) NOT NULL,
+	unidadeMedida_obra  numeric(02) NOT NULL,
+	quantidade_obra     numeric(05) NOT NULL,
+	enderecoObra_obra   character varying(100) NOT NULL,
+	bairroObra_obra     character varying(20) NOT NULL,
+	nomeFiscalObra_obra character varying(50) NOT NULL,
+	cpfFiscalObra_obra  numeric(11) NOT NULL,
+    nroSequencial_obra  numeric(06) NOT NULL
+)
+
+CREATE TABLE public.empenho (
+	id_empenho SERIAL PRIMARY KEY NOT NULL,
+	tipoRegistro_empenho                       numeric(02) NOT NULL,
+	codPrograma_empenho                        numeric(04) NOT NULL,
+	codOrgao_empenho                           numeric(02) NOT NULL,
+	codUnidade_empenho                         numeric(02) NOT NULL,
+	codFuncao_empenho                          numeric(02) NOT NULL,
+	codSubFuncao_empenho                       numeric(03) NOT NULL,
+	naturezaAcao_empenho                       numeric(01) NOT NULL,
+	nroProjAtiv_empenho                        numeric(03) NOT NULL,
+	elementoDespesa_empenho                    numeric(06) NOT NULL,
+	subElemento_empenho                        numeric(02) NOT NULL,
+	nroEmpenho_empenho                         numeric(06) NOT NULL,
+	modalidadeLicitacao_empenho                numeric(02) NOT NULL,
+	fundamentacaoLegal_empenho                 numeric(02) NOT NULL,
+	justificativaDispensaInexibilidade_empenho character varying(20) NOT NULL,
+	razaoEscolha_empenho                       character varying(20) NOT NULL,
+	nroProcLicitacao_empenho                   numeric(08) NOT NULL,
+	anoProcLicitacao_empenho                   numeric(04) NOT NULL,
+	nroProcAdmCorrespondente_empenho           numeric(20) NOT NULL,
+	assunto_empenho                            numeric(02) NOT NULL,
+	tpEmpenho_empenho                          numeric(02) NOT NULL,
+	dtEmpenho_empenho                          timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+	vlBruto_empenho                            numeric(11,02) NOT NULL,
+	nomeCredor_empenho                         character varying(20) NOT NULL,
+	tipoCredor_empenho                         numeric(01) NOT NULL,
+	cpfCnpj_empenho                            numeric(14) NOT NULL,
+	especificacaoEmpenho_empenho               character varying(255) NOT NULL,
+	cpfRespEmpenho_empenho                     numeric(11) NOT NULL,
+	nomeRespEmpenho_empenho                    character varying(35) NOT NULL,
+	idColare_empenho                           numeric(15) NOT NULL,
+    nroSequencial_empenho                      numeric(06) NOT NULL
+)
+
+CREATE TABLE public.empFonteRecurso (
+	id_empFonteRecurso SERIAL PRIMARY KEY NOT NULL,
+	tipoRegistro_empFonteRecurso    numeric(02) NOT NULL,
+	codPrograma_empFonteRecurso     numeric(04) NOT NULL,
+	codOrgao_empFonteRecurso        numeric(02) NOT NULL,
+	codUnidade_empFonteRecurso      numeric(02) NOT NULL,
+	codFuncao_empFonteRecurso       numeric(02) NOT NULL,
+	codSubFuncao_empFonteRecurso    numeric(03) NOT NULL,
+	naturezaAcao_empFonteRecurso    numeric(01) NOT NULL,
+	nroProjAtiv_empFonteRecurso     numeric(03) NOT NULL,
+	elementoDespesa_empFonteRecurso numeric(06) NOT NULL,
+	subElemento_empFonteRecurso     numeric(02) NOT NULL,
+	nroEmpenho_empFo,teRecurso      numeric(06) NOT NULL,
+	codFontRecursos_empFonteRecurso numeric(06) NOT NULL,
+	vlRecurso_empFonteRecurso       numeric(11,02) NOT NULL,
+    nroSequencial_empFonteRecurso   numeric(06) NOT NULL
+)
+
+
+INSERT INTO public.entidades(
+	id_entidade, entidade_nome, orgao_governo, email, cnpj, cnae, tipo_orgao_texto, natureza_juridica, ativo, tipo_orgao_select, id_usuario_autorizado, id_user)
+	VALUES ('GUIMARAES E LACERDA LTDA',
+	'PODER EXECUTIVO',
+	'contabilnc@gmail.com',
+	'01275438000182',
+	'102111',
+	'PODER LEGISLATIVO', 
+	'NATURE',
+	'true',
+	'S1S1',
+	'1',
+	'1');
+
+create table escolaridades (
+	id_escolaridade SERIAL PRIMARY KEY NOT NULL,
+	escolaridade_nome  VARCHAR (255),
+)
+
+
+
+
+
+
+
+create table admins (
+	id_admin  INTEGER PRIMARY KEY AUTOINCREMENT,
+    name      VARCHAR (50),
+	email     VARCHAR (100),
+	password  VARCHAR (100)
+);
+
+create table doctors (
+	id_doctor SERIAL PRIMARY KEY NOT NULL,
+	name      VARCHAR (50),
+	specialty VARCHAR (50),
+	icon      VARCHAR (10)
+);
+
+create table services (
+	id_service  SERIAL PRIMARY KEY NOT NULL,
+	description VARCHAR (50)
+);
+
+create table doctors_services (
+	id_doctor_service SERIAL PRIMARY KEY NOT NULL,
+	id_doctor  INTEGER,
+	id_service INTEGER,
+	price      DECIMAL(9,2),
+	foreign key (id_doctor) references doctors(id_doctor),
+	foreign key (id_service) references services(id_service)
+);
+
+create table appointments (
+	id_appointment SERIAL PRIMARY KEY NOT NULL,
+	id_doctor    INTEGER,
+	id_service   INTEGER,
+	id_user      INTEGER,
+	booking_date DATE,
+	booking_hour VARCHAR(5),
+	
+	foreign key (id_doctor) references doctors(id_doctor),
+    foreign key (id_service) references services(id_service),
+    foreign key (id_user) references users(id_user)
+);
