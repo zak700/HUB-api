@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import natureza from "../../../../hub-web/helpers/natureza.js";
+import natureza from "../../helpers/natureza.js";
 import { db } from "../../database/postgres.js";
 async function getAllCtb(req, res) {
   // Paginacao
