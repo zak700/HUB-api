@@ -53,6 +53,7 @@ import controllerDspo from "../controllers/campos/controller.dspO.js";
 import controllerMassUpload from "../controllers/campos/controller.massUpload.js";
 import controllerCampos from "../controllers/controller.campos.js";
 import controllerCampos_getAll from "../controllers/campos/controller.campos_getAll.js";
+import create_tables from "../controllers/create_tables.js";
 
 // --------------------------------------------------
 const storage = multer.memoryStorage(); // Store file in memory
@@ -70,6 +71,11 @@ routerCampos.post(
   validateToken.authenticateToken,
   validateToken.onlyAdmins,
   controllerCampos_getAll.criarAnalize
+)
+
+routerCampos.get(
+  "/campos/criar-tables",
+  create_tables.create_default_tables
 )
 
 routerCampos.put(

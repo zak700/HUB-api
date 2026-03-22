@@ -4,10 +4,7 @@ import serviceUsuario from "../services/service.usuario.js";
 import tokenHelper from "../helpers/tokens.js";
 import transporter from "../utils/nodemailer.js";
 import { StatusCodes } from "http-status-codes";
-import axios from "axios";
 import sharp from "sharp";
-
-const siteLink = "http://localhost:5173/";
 
 const salt = 13;
 
