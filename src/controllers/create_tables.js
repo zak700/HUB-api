@@ -1,16 +1,4 @@
-import knex from "knex";
-
-const db = knex({
-  client: "pg",
-  connection: {
-    host: '127.0.0.1',
-    port: 5432,
-    user: "hub_user",
-    password: 'j5qbvH1rzDAr7AyZrJLw2ImlWshPl0ew',
-    database: 'jzzzlxmkmujldtve',
-    charset: 'utf8'
-  },
-});
+import { db } from "../database/postgres.js"
 
 async function create_default_tables(req, res) {
   try {
@@ -332,7 +320,5 @@ async function create_default_tables(req, res) {
     console.log("cabo")
   }
 }
-
-create_default_tables()
 
 export default { create_default_tables }

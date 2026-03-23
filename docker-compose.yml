@@ -1,28 +1,21 @@
-extra_hosts:
-  - "host.docker.internal:host-gateway"
-version: "3.9"
-
 services:
   api:
     build: .
     container_name: hub-api
     restart: always
+
     env_file:
       - .env
+
     ports:
       - "3000:3000"
+
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
     labels:
       - "traefik.enable=true"
-
-      # domínio
       - "traefik.http.routers.api.rule=Host(`hubmain-api.cloud`)"
-
-      # HTTPS
       - "traefik.http.routers.api.entrypoints=websecure"
       - "traefik.http.routers.api.tls.certresolver=letsencrypt"
-
-      # porta interna
       - "traefik.http.services.api.loadbalancer.server.port=3000"
