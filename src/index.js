@@ -46,8 +46,6 @@ app.use((err, req, res, next) => {
     .json({ error: "Algo deu errado. Tente novamente mais tarde." });
 });
 
-const port = process.env.PORT || 3000;
-
-const server = app.listen(port, () => {
-  console.log(`Servidor rodando na porta: ${port}`);
+app.listen(process.env.PORT || 3000, "0.0.0.0", () => {
+  console.log("API running");
 });
