@@ -1,7 +1,6 @@
 import { db } from "../database/postgres.js";
 
 const natureza = {
-
   PO_values: {
     "01": "10131",
     "02": "20231",
@@ -12,13 +11,13 @@ const natureza = {
     "07": "10132",
     "08": "10131",
     "09": "10131",
-    "10": "10131",
-    "11": "10131",
-    "12": "10131",
-    "13": "10131",
-    "14": "10131",
-    "15": "10131",
-    "16": "10131",
+    10: "10131",
+    11: "10131",
+    12: "10131",
+    13: "10131",
+    14: "10131",
+    15: "10131",
+    16: "10131",
   },
   // filter by consolidados
   filterOrg: function (toFilter, orgao, consolidado) {
@@ -26,19 +25,19 @@ const natureza = {
       return toFilter;
     } else {
       const filtered = toFilter.filter(
-        (e) => parseInt(e.content.codOrgao) === parseInt(orgao)
+        (e) => parseInt(e.content.codOrgao) === parseInt(orgao),
       );
       return filtered;
     }
   },
 
   getOrgaosByDate: async function (date = "") {
-    if (!date) return null
-    const dataYear = this.dataToYear(date)
-    const fullData = `${date.substring(0, 2)}${dataYear}`
-    const fullDataYear = parseInt(fullData.substring(2))
-    const fullDataMonth = parseInt(fullData.substring(0, 2))
-    const allOrgaos = (await db("orgao").select("*")).map((e) => e.content)
+    if (!date) return null;
+    const dataYear = this.dataToYear(date);
+    const fullData = `${date.substring(0, 2)}${dataYear}`;
+    const fullDataYear = parseInt(fullData.substring(2));
+    const fullDataMonth = parseInt(fullData.substring(0, 2));
+    const allOrgaos = (await db("orgao").select("*")).map((e) => e.content);
     const filtered = allOrgaos.filter((e) => {
       const val = {
         dtInicio: e.dtInicio.substring(2),
@@ -46,29 +45,31 @@ const natureza = {
         dtInicioAno: parseInt(e.dtInicio.substring(4)),
         dtInicioMes: parseInt(e.dtInicio.substring(2, 4)),
         dtFinalAno: parseInt(e.dtFinal.substring(4)),
-        dtFinalMes: parseInt(e.dtFinal.substring(2, 4))
-      }
+        dtFinalMes: parseInt(e.dtFinal.substring(2, 4)),
+      };
 
-      if (val.dtInicio === fullData || val.dtFinal === fullData) return true
+      if (val.dtInicio === fullData || val.dtFinal === fullData) return true;
 
       if (val.dtInicioAno <= fullDataYear && val.dtFinalAno >= fullDataYear) {
-        if (val.dtInicioAno === fullDataYear) return val.dtInicioMes <= fullDataMonth
-        if (val.dtFinalAno === fullDataYear) return val.dtFinalMes >= fullDataMonth
-        return true
+        if (val.dtInicioAno === fullDataYear)
+          return val.dtInicioMes <= fullDataMonth;
+        if (val.dtFinalAno === fullDataYear)
+          return val.dtFinalMes >= fullDataMonth;
+        return true;
       }
 
-      return false
-    })
+      return false;
+    });
 
-    return filtered
+    return filtered;
   },
 
   filterOrgaosByDate: function (allOrgaos = [], date) {
-    if (!date) return null
-    const dataYear = this.dataToYear(date)
-    const fullData = `${date.substring(0, 2)}${dataYear}`
-    const fullDataYear = parseInt(fullData.substring(2))
-    const fullDataMonth = parseInt(fullData.substring(0, 2))
+    if (!date) return null;
+    const dataYear = this.dataToYear(date);
+    const fullData = `${date.substring(0, 2)}${dataYear}`;
+    const fullDataYear = parseInt(fullData.substring(2));
+    const fullDataMonth = parseInt(fullData.substring(0, 2));
     const filtered = allOrgaos.filter((e) => {
       const val = {
         dtInicio: e.dtInicio.substring(2),
@@ -76,21 +77,23 @@ const natureza = {
         dtInicioAno: parseInt(e.dtInicio.substring(4)),
         dtInicioMes: parseInt(e.dtInicio.substring(2, 4)),
         dtFinalAno: parseInt(e.dtFinal.substring(4)),
-        dtFinalMes: parseInt(e.dtFinal.substring(2, 4))
-      }
+        dtFinalMes: parseInt(e.dtFinal.substring(2, 4)),
+      };
 
-      if (val.dtInicio === fullData || val.dtFinal === fullData) return true
+      if (val.dtInicio === fullData || val.dtFinal === fullData) return true;
 
       if (val.dtInicioAno <= fullDataYear && val.dtFinalAno >= fullDataYear) {
-        if (val.dtInicioAno === fullDataYear) return val.dtInicioMes <= fullDataMonth
-        if (val.dtFinalAno === fullDataYear) return val.dtFinalMes >= fullDataMonth
-        return true
+        if (val.dtInicioAno === fullDataYear)
+          return val.dtInicioMes <= fullDataMonth;
+        if (val.dtFinalAno === fullDataYear)
+          return val.dtFinalMes >= fullDataMonth;
+        return true;
       }
 
-      return false
-    })
+      return false;
+    });
 
-    return filtered
+    return filtered;
   },
 
   toRS: function (string) {
@@ -109,12 +112,12 @@ const natureza = {
     if (string.includes(".")) {
       return Dash
         ? "-" +
-        dots(string.split(".")[0].substring(1)) +
-        "," +
-        string.split(".")[1].padEnd(2, "0")
+            dots(string.split(".")[0].substring(1)) +
+            "," +
+            string.split(".")[1].padEnd(2, "0")
         : dots(string.split(".")[0]) +
-        "," +
-        string.split(".")[1].padEnd(2, "0");
+            "," +
+            string.split(".")[1].padEnd(2, "0");
     } else {
       return Dash
         ? "-" + dots(string.substring(1)) + ",00"
@@ -123,7 +126,9 @@ const natureza = {
   },
 
   toNum: function (string, accurate = false) {
-    return accurate ? parseInt(string.replaceAll(".", "").replaceAll(",", "")) / 100 : parseInt(string.replaceAll(".", "").replaceAll(",", ""))
+    return accurate
+      ? parseInt(string.replaceAll(".", "").replaceAll(",", "")) / 100
+      : parseInt(string.replaceAll(".", "").replaceAll(",", ""));
   },
 
   sum: function (campos = [{ campo: Array, toSum: String }]) {
@@ -132,7 +137,7 @@ const natureza = {
     campos.forEach((campos) => {
       campos.campo?.forEach((e) => {
         sum += parseInt(
-          e.content[campos.toSum].replaceAll(",", "").replaceAll(".", "")
+          e.content[campos.toSum].replaceAll(",", "").replaceAll(".", ""),
         );
       });
     });
@@ -154,7 +159,7 @@ const natureza = {
     campos.forEach((campos) => {
       campos.campo?.forEach((e) => {
         sum += parseInt(
-          e.content[campos.toSum].replaceAll(",", "").replaceAll(".", "")
+          e.content[campos.toSum].replaceAll(",", "").replaceAll(".", ""),
         );
       });
     });
@@ -170,7 +175,7 @@ const natureza = {
 
     campos[0].campo?.forEach((e) => {
       sum += parseInt(
-        e.content[campos[0].toSub]?.replaceAll(",", "").replaceAll(".", "")
+        e.content[campos[0].toSub]?.replaceAll(",", "").replaceAll(".", ""),
       );
     });
 
@@ -179,7 +184,7 @@ const natureza = {
     campos?.forEach((campos) => {
       campos?.campo?.forEach((e) => {
         sum -= parseInt(
-          e.content[campos.toSub]?.replaceAll(",", "").replaceAll(".", "")
+          e.content[campos.toSub]?.replaceAll(",", "").replaceAll(".", ""),
         );
       });
     });
@@ -259,41 +264,27 @@ const natureza = {
     const res = await this.filterOrg(
       await db(campo).select("*"),
       orgao,
-      consolidado
+      consolidado,
     );
-    if (dataType === "y") {
-      return res.filter((e) => {
-        return (
-          e.data >= this.dataToYear(dataI) &&
-          e.data <= this.dataToYear(dataF)
+    if (dataType === "m" || dataType === "y") {
+      console.log(
+        (consolidado !== "false"
+          ? ""
+          : `content ->> 'codOrgao' = '${orgao.substring(2, "0")}' AND `) +
+          this.fromToData(dataI, dataF, dataType)
+            .map((e) => `data = '${e}'`)
+            .join(" OR "),
+      );
+      return await db(campo)
+        .select("*")
+        .whereRaw(
+          (consolidado !== "false"
+            ? ""
+            : `content ->> 'codOrgao' = '${orgao.substring(2, "0")}' AND `) +
+            this.fromToData(dataI, dataF)
+              .map((e) => `data = '${e}'`)
+              .join(" OR "),
         );
-      });
-    } else if (dataType === "m") {
-      return res.filter((e) => {
-        let returns = true;
-
-        if (this.dataToYear(dataI) < this.dataToYear(e.data)) {
-          returns = false;
-        }
-
-        if (this.dataToYear(dataI) === this.dataToYear(e.data)) {
-          dataI.substring(0, 2) > e.data.substring(0, 2)
-            ? (returns = false)
-            : null;
-        }
-
-        if (this.dataToYear(dataF) > this.dataToYear(e.data)) {
-          returns = false;
-        }
-
-        if (this.dataToYear(dataF) === this.dataToYear(e.data)) {
-          dataF.substring(0, 2) < e.data.substring(0, 2)
-            ? (returns = false)
-            : null;
-        }
-
-        returns;
-      });
     } else if (dataType === "bi") {
       return res.filter((e) => {
         let newData = "";
@@ -302,11 +293,11 @@ const natureza = {
             "12" + String(parseInt(dataF.substring(2, 4)) - 1).padStart(2, "0");
           if (
             parseInt(newData.substring(2, 4)) <
-            parseInt(dataI.substring(2, 4)) ||
+              parseInt(dataI.substring(2, 4)) ||
             (parseInt(newData.substring(2, 4)) ==
               parseInt(dataI.substring(2, 4)) &&
               parseInt(newData.substring(0, 2)) <=
-              parseInt(dataI.substring(0, 2)))
+                parseInt(dataI.substring(0, 2)))
           ) {
             newData = dataI;
           }
@@ -316,11 +307,11 @@ const natureza = {
             dataF.substring(2, 4);
           if (
             parseInt(newData.substring(2, 4)) <
-            parseInt(dataI.substring(2, 4)) ||
+              parseInt(dataI.substring(2, 4)) ||
             (parseInt(newData.substring(2, 4)) ==
               parseInt(dataI.substring(2, 4)) &&
               parseInt(newData.substring(0, 2)) <=
-              parseInt(dataI.substring(0, 2)))
+                parseInt(dataI.substring(0, 2)))
           ) {
             newData = dataI;
           }
@@ -345,9 +336,8 @@ const natureza = {
     final = false,
     fromFinal = 0,
     exceto = false,
-    fromExceto = 0
+    fromExceto = 0,
   ) {
-
     const filtered = campo.filter((campo) => {
       const content = campo.content[content_type];
 
@@ -356,7 +346,7 @@ const natureza = {
         const expected = String(inicialItem);
         const actual = content.substring(
           fromInicial || 0,
-          expected.length + (fromInicial || 0)
+          expected.length + (fromInicial || 0),
         );
         return expected == actual;
       });
@@ -403,7 +393,7 @@ const natureza = {
     final = false,
     fromFinal = 0,
     exceto = false,
-    fromExceto = 0
+    fromExceto = 0,
   ) {
     const subCampo = campo.map((e) => e.content.content).flat();
 
@@ -418,7 +408,7 @@ const natureza = {
         const expected = String(inicialItem);
         const actual = content.substring(
           fromInicial || 0,
-          expected.length + (fromInicial || 0)
+          expected.length + (fromInicial || 0),
         );
         return expected == actual;
       });
@@ -485,8 +475,38 @@ const natureza = {
   multRS: function (a, b) {
     const valA = this.toInt(a) / 100;
     const valB = this.toInt(b) / 100;
-    return this.toRS(String((valA / valB).toFixed(2)))
-  }
+    return this.toRS(String((valA / valB).toFixed(2)));
+  },
+
+  fromToData: function (dataI, dataF, dataType = "m") {
+    switch (dataType) {
+      case "m": {
+        const mDataI =
+          parseInt(dataI.substring(0, 2)) +
+          parseInt(dataI.substring(2, 4)) * 12;
+        const mDataF =
+          parseInt(dataF.substring(0, 2)) +
+          parseInt(dataF.substring(2, 4)) * 12;
+        if (mDataF === mDataI) return [dataI];
+        const arr = Array.from({ length: mDataF - mDataI + 1 }, (_, i) => {
+          const num = mDataI + i;
+          return `${String(((num - 1) % 12) + 1).padStart(2, "0")}${Math.floor((num - 1) / 12)}`;
+        });
+        return arr;
+      }
+      case "y": {
+        console.log("IN CASE Y")
+        if (dataI === dataF) return [parseInt(this.dataToYear(dataI))];
+        const yDataI = parseInt(this.dataToYear(dataI));
+        const yDataF = parseInt(this.dataToYear(dataF));
+        const arr = Array.from(
+          { length: yDataF - yDataI + 1 },
+          (_, i) => yDataI + i,
+        );
+        return arr;
+      }
+    }
+  },
 };
 
 export default natureza;

@@ -24,7 +24,7 @@ app.use(cookieParser()); // Middleware para analisar cookies
 // Configuração do CORS (permitir apenas domínios específicos)
 app.use(
   cors({
-    origin: "https://hubmain.com.br",
+    origin: ["http://localhost:5173", "https://hubmain.com.br", "https://www.hubmain.com.br"],
     credentials: true, // se for usar cookies/autenticação no futuro
   })
 );

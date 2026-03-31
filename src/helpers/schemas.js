@@ -1,138 +1,135 @@
-import { db } from "../database/postgres.js"
-
-async function create_default_tables(req, res) {
-  try {
+export default {
+  checkNew: async (code) => {
     await db.raw(`
+      CREATE SCHEMA IF NOT EXISTS ${code};
 
-        
-
-      CREATE TABLE IF NOT EXISTS public.abl (
+      CREATE TABLE IF NOT EXISTS ${code}.abl (
           id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
           content json NOT NULL,
           data character varying(4) NOT NULL
       );
 
-      CREATE TABLE IF NOT EXISTS public.aex (
+      CREATE TABLE IF NOT EXISTS ${code}.aex (
           id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
           content json NOT NULL,
           data character varying(4) NOT NULL
       );
 
-      CREATE TABLE IF NOT EXISTS public.alq (
+      CREATE TABLE IF NOT EXISTS ${code}.alq (
           id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
           content json NOT NULL,
           data character varying(4) NOT NULL
       );
 
-      CREATE TABLE IF NOT EXISTS public.anl (
+      CREATE TABLE IF NOT EXISTS ${code}.anl (
           id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
           content json NOT NULL,
           data character varying(4) NOT NULL
       );
 
-      CREATE TABLE IF NOT EXISTS public.aoc (
+      CREATE TABLE IF NOT EXISTS ${code}.aoc (
           id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
           content json NOT NULL,
           data character varying(4) NOT NULL
       );
 
-      CREATE TABLE IF NOT EXISTS public.aop (
+      CREATE TABLE IF NOT EXISTS ${code}.aop (
           id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
           content json NOT NULL,
           data character varying(4) NOT NULL
       );
 
-      CREATE TABLE IF NOT EXISTS public.are (
+      CREATE TABLE IF NOT EXISTS ${code}.are (
           id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
           content json NOT NULL,
           data character varying(4) NOT NULL
       );
 
-      CREATE TABLE IF NOT EXISTS public.arp (
+      CREATE TABLE IF NOT EXISTS ${code}.arp (
           id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
           content json NOT NULL,
           data character varying(4) NOT NULL
       );
 
-      CREATE TABLE IF NOT EXISTS public.candidatos (
+      CREATE TABLE IF NOT EXISTS ${code}.candidatos (
           id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
           data json NOT NULL,
           id_usuario integer NOT NULL
       );
 
-      CREATE TABLE IF NOT EXISTS public.cob (
+      CREATE TABLE IF NOT EXISTS ${code}.cob (
           id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
           content json NOT NULL,
           data character varying(4) NOT NULL
       );
 
-      CREATE TABLE IF NOT EXISTS public.con (
+      CREATE TABLE IF NOT EXISTS ${code}.con (
           id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
           content json NOT NULL,
           data character varying(4) NOT NULL
       );
 
-      CREATE TABLE IF NOT EXISTS public.ctb (
+      CREATE TABLE IF NOT EXISTS ${code}.ctb (
           id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
           content json NOT NULL,
           data character varying(4) NOT NULL
       );
 
-      CREATE TABLE IF NOT EXISTS public.cvc (
+      CREATE TABLE IF NOT EXISTS ${code}.cvc (
           id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
           content json NOT NULL,
           data character varying(4) NOT NULL
       );
 
-      CREATE TABLE IF NOT EXISTS public.dcl (
+      CREATE TABLE IF NOT EXISTS ${code}.dcl (
           id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
           content json NOT NULL,
           data character varying(4) NOT NULL
       );
 
-      CREATE TABLE IF NOT EXISTS public.dfr (
+      CREATE TABLE IF NOT EXISTS ${code}.dfr (
           id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
           content json NOT NULL,
           data character varying(4) NOT NULL
       );
 
-      CREATE TABLE IF NOT EXISTS public.dic (
+      CREATE TABLE IF NOT EXISTS ${code}.dic (
           id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
           content json NOT NULL,
           data character varying(4) NOT NULL
       );
 
-      CREATE TABLE IF NOT EXISTS public.dmr (
+      CREATE TABLE IF NOT EXISTS ${code}.dmr (
           id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
           content json NOT NULL,
           data character varying(4) NOT NULL
       );
 
-      CREATE TABLE IF NOT EXISTS public.dsi (
+      CREATE TABLE IF NOT EXISTS ${code}.dsi (
           id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
           content json NOT NULL,
           data character varying(4) NOT NULL
       );
 
-      CREATE TABLE IF NOT EXISTS public."dspO" (
+      CREATE TABLE IF NOT EXISTS ${code}."dspO" (
           id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
           data character varying(4) NOT NULL,
           content json NOT NULL
       );
 
-      CREATE TABLE IF NOT EXISTS public.ecl (
+      CREATE TABLE IF NOT EXISTS ${code}.ecl (
           id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
           content json NOT NULL,
           data character varying(4) NOT NULL
       );
 
-      CREATE TABLE IF NOT EXISTS public.emp (
+      CREATE TABLE IF NOT EXISTS ${code}.emp (
           id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
           content json NOT NULL,
           data character varying(4) NOT NULL
       );
 
-      CREATE TABLE IF NOT EXISTS public.entidade (
+      CREATE TABLE IF NOT EXISTS ${code}.entidade (
           entidade_nome character varying(255) NOT NULL,
           orgao_governo character varying(255) NOT NULL,
           email character varying(255) NOT NULL,
@@ -147,83 +144,83 @@ async function create_default_tables(req, res) {
           id_usuario_autorizado integer[]
       );
 
-      CREATE TABLE IF NOT EXISTS public.eoc (
+      CREATE TABLE IF NOT EXISTS ${code}.eoc (
           id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
           content json NOT NULL,
           data character varying(4) NOT NULL
       );
 
-      CREATE TABLE IF NOT EXISTS public.ext (
+      CREATE TABLE IF NOT EXISTS ${code}.ext (
           id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
           content json NOT NULL,
           data character varying(4) NOT NULL
       );
 
-      CREATE TABLE IF NOT EXISTS public.hbl (
+      CREATE TABLE IF NOT EXISTS ${code}.hbl (
           id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
           content json NOT NULL,
           data character varying(4) NOT NULL
       );
 
-      CREATE TABLE IF NOT EXISTS public.hml (
+      CREATE TABLE IF NOT EXISTS ${code}.hml (
           id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
           content json NOT NULL,
           data character varying(4) NOT NULL
       );
 
-      CREATE TABLE IF NOT EXISTS public.ide (
+      CREATE TABLE IF NOT EXISTS ${code}.ide (
           id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
           content json NOT NULL
       );
 
-      CREATE TABLE IF NOT EXISTS public.isi (
+      CREATE TABLE IF NOT EXISTS ${code}.isi (
           id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
           content json NOT NULL,
           data character varying(4) NOT NULL
       );
 
-      CREATE TABLE IF NOT EXISTS public.jgl (
+      CREATE TABLE IF NOT EXISTS ${code}.jgl (
           id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
           content json NOT NULL,
           data character varying(4) NOT NULL
       );
 
-      CREATE TABLE IF NOT EXISTS public.lnc (
+      CREATE TABLE IF NOT EXISTS ${code}.lnc (
           id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
           content json NOT NULL,
           data character varying(4) NOT NULL
       );
 
-      CREATE TABLE IF NOT EXISTS public.lqd (
+      CREATE TABLE IF NOT EXISTS ${code}.lqd (
           id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
           content json NOT NULL,
           data character varying(4) NOT NULL
       );
 
-      CREATE TABLE IF NOT EXISTS public.ops (
+      CREATE TABLE IF NOT EXISTS ${code}.ops (
           id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
           content json NOT NULL,
           data character varying(4) NOT NULL
       );
 
-      CREATE TABLE IF NOT EXISTS public.orgao (
+      CREATE TABLE IF NOT EXISTS ${code}.orgao (
           id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
           content json NOT NULL
       );
 
-      CREATE TABLE IF NOT EXISTS public.par (
+      CREATE TABLE IF NOT EXISTS ${code}.par (
           id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
           content json NOT NULL,
           data character varying(4) NOT NULL
       );
 
-      CREATE TABLE IF NOT EXISTS public.pct (
+      CREATE TABLE IF NOT EXISTS ${code}.pct (
           id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
           content json NOT NULL,
           data character varying(4) NOT NULL
       );
 
-      CREATE TABLE IF NOT EXISTS public.posts (
+      CREATE TABLE IF NOT EXISTS ${code}.posts (
           id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
           id_usuario integer NOT NULL,
           title character varying(255) NOT NULL,
@@ -231,43 +228,43 @@ async function create_default_tables(req, res) {
           created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP
       );
 
-      CREATE TABLE IF NOT EXISTS public.prl (
+      CREATE TABLE IF NOT EXISTS ${code}.prl (
           id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
           content json NOT NULL,
           data character varying(4) NOT NULL
       );
 
-      CREATE TABLE IF NOT EXISTS public.rec (
+      CREATE TABLE IF NOT EXISTS ${code}.rec (
           id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
           content json NOT NULL,
           data character varying(4) NOT NULL
       );
 
-      CREATE TABLE IF NOT EXISTS public."recO" (
+      CREATE TABLE IF NOT EXISTS ${code}."recO" (
           id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
           content json NOT NULL,
           data character varying(4) NOT NULL
       );
 
-      CREATE TABLE IF NOT EXISTS public.reo (
+      CREATE TABLE IF NOT EXISTS ${code}.reo (
           id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
           content json NOT NULL,
           data character varying(4) NOT NULL
       );
 
-      CREATE TABLE IF NOT EXISTS public.rpl (
+      CREATE TABLE IF NOT EXISTS ${code}.rpl (
           id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
           content json NOT NULL,
           data character varying(4) NOT NULL
       );
 
-      CREATE TABLE IF NOT EXISTS public.rsp (
+      CREATE TABLE IF NOT EXISTS ${code}.rsp (
           id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
           content json NOT NULL,
           data character varying(4) NOT NULL
       );
 
-      CREATE TABLE IF NOT EXISTS public.rubricas (
+      CREATE TABLE IF NOT EXISTS ${code}.rubricas (
           id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
           anexo1 json NOT NULL,
           anexo2 json,
@@ -284,25 +281,25 @@ async function create_default_tables(req, res) {
           anexo14 json
       );
 
-      CREATE TABLE IF NOT EXISTS public.tfr (
+      CREATE TABLE IF NOT EXISTS ${code}.tfr (
           id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
           content json NOT NULL,
           data character varying(4) NOT NULL
       );
 
-      CREATE TABLE IF NOT EXISTS public.trb (
+      CREATE TABLE IF NOT EXISTS ${code}.trb (
           id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
           content json NOT NULL,
           data character varying(4) NOT NULL
       );
 
-      CREATE TABLE IF NOT EXISTS public.uoc (
+      CREATE TABLE IF NOT EXISTS ${code}.uoc (
           id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
           content json NOT NULL,
           data character varying(4) NOT NULL
       );
 
-      CREATE TABLE IF NOT EXISTS public.usuarios (
+      CREATE TABLE IF NOT EXISTS ${code}.usuarios (
           id_usuario INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
           nome character varying(50),
           email character varying(100),
@@ -315,13 +312,5 @@ async function create_default_tables(req, res) {
           permissoes character varying[] NOT NULL
       );
     `)
-    res.status(200).json({ message: "boa" })
-  } catch (error) {
-    console.error("ERRO AO CRIAR CAMPOS", error)
-    res.status(500).json({ message: error })
-  } finally {
-    console.log("cabo")
   }
 }
-
-export default { create_default_tables }
