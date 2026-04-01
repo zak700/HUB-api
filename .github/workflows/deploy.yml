@@ -23,6 +23,7 @@ jobs:
             git stash                          # Protege mudanças locais
             git pull origin main --rebase      # Puxa o código novo
             git stash pop || true              # Tenta devolver as mudanças (ignora erro se não houver nada)
+            rm -rf node_modules
             npm install
             docker compose down
             docker compose up -d --build
