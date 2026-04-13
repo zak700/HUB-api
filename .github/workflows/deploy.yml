@@ -25,5 +25,6 @@ jobs:
             git stash pop || true              # Tenta devolver as mudanças (ignora erro se não houver nada)
             rm -rf node_modules
             npm install
+            npm audit fix
             docker compose down
             docker compose up -d --build
