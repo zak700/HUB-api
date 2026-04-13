@@ -15,19 +15,21 @@ const salt = 13;
 
 async function register(req, res) {
   try {
+    console.log("a")
     await db.schema.createSchemaIfNotExists("public");
     const usuarios = await db.schema.withSchema("public").hasTable("usuarios")
     if (!usuarios) {
       await db.raw(`
         CREATE TABLE IF NOT EXISTS public.usuarios (
           id_usuario INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-          nome character varying(50),
-          email character varying(100),
-          password character varying(100),
+          nome character varying(50) NOT NULL,
+          email character varying(100) NOT NULL,
+          password character varying(100) NOT NULL,
           pfp_image bytea,
-          cpf character varying(11),
-          telefone character varying(20),
-          enderecos jsonb,
+          cpf character varying(11) NOT NULL,
+          telefone character varying(20) NOT NULL,
+          enderecos jsonb NOT NULL,
+          endereco_edit jsonb,
           ativo boolean DEFAULT true NOT NULL,
           permissoes character varying[] NOT NULL
         );
@@ -296,7 +298,7 @@ async function updateUser(req, res) {
 }
 
 async function uploadImage(req, res) {
-  const { id } = req.params;
+  const user = await natureza.getUser(req)
   const image = req.file;
 
   if (!image) {
@@ -304,7 +306,7 @@ async function uploadImage(req, res) {
   }
 
   try {
-    const target = await db("usuarios").select("id_usuario", "ativo").where({ id_usuario: id }).first();
+    const target = await db("usuarios").select("id_usuario", "ativo").where({ id_usuario: user.id_usuario }).first();
     if (!target) return res.status(404).json({ message: "User not found" });
     if (target.ativo === false) return res.status(403).json({ message: "Usuário inativo." });
 
@@ -312,7 +314,7 @@ async function uploadImage(req, res) {
     const resizedImageBuffer = await sharp(image.buffer)
       .resize(420, 420, { fit: 'cover' })
       .toBuffer();
-    const result = await serviceUsuario.uploadImage(id, resizedImageBuffer);
+    const result = await serviceUsuario.uploadImage(user.id_usuario, resizedImageBuffer);
 
     if (!result.success) {
       console.error(result.message);
