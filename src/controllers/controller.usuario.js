@@ -15,6 +15,7 @@ const salt = 13;
 
 async function register(req, res) {
   try {
+    await db.schema.createSchemaIfNotExists("public");
     const usuarios = await db.schema.withSchema("public").hasTable("usuarios")
     if (!usuarios) {
       await db.raw(`
