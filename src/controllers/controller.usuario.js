@@ -5,6 +5,8 @@ import tokenHelper from "../helpers/tokens.js";
 import transporter from "../utils/nodemailer.js";
 import { StatusCodes } from "http-status-codes";
 import sharp from "sharp";
+import schemas from "../helpers/schemas.js";
+import natureza from "../helpers/natureza.js";
 
 const salt = 13;
 
@@ -12,17 +14,25 @@ const salt = 13;
 // Function to handle user registration
 
 async function register(req, res) {
-  const { nome, email, password, cpf, telefone } = req.body;
-
   try {
-    const result = await serviceUsuario.register(
-      nome,
-      email,
-      password,
-      salt,
-      cpf,
-      telefone
-    );
+    const usuarios = await db.schema.withSchema("public").hasTable("usuarios")
+    if (!usuarios) {
+      await db.raw(`
+        CREATE TABLE IF NOT EXISTS public.usuarios (
+          id_usuario INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          nome character varying(50),
+          email character varying(100),
+          password character varying(100),
+          pfp_image bytea,
+          cpf character varying(11),
+          telefone character varying(20),
+          enderecos jsonb,
+          ativo boolean DEFAULT true NOT NULL,
+          permissoes character varying[] NOT NULL
+        );
+      `)
+    }
+    const result = await serviceUsuario.register({ ...req.body, salt });
 
     if (!result.success) {
       console.error(result.message);
@@ -176,7 +186,8 @@ async function getUserById(req, res) {
         "email",
         "telefone",
         "permissoes",
-        "pfp_image"
+        "pfp_image",
+        "enderecos"
       )
       .where({ id_usuario: id })
       .first();
@@ -193,12 +204,17 @@ async function getUserById(req, res) {
 }
 
 async function getOwnUserById(req, res) {
-  const { id } = req.params;
+  const userToken = req.cookies?.refreshToken;
+
+  if (!userToken) {
+    return res.status(401).json({ message: "No token provided" });
+  }
 
   try {
+    const decoded = tokenHelper.verifyRefreshToken(userToken);
     const user = await db("usuarios")
-      .select("*")
-      .where({ id_usuario: id })
+      .select("id_usuario", "nome", "email", "telefone", "cpf", "enderecos", "pfp_image", "permissoes", "endereco_edit", "ativo")
+      .where({ id_usuario: decoded.userId })
       .first();
 
     if (!user) {
@@ -221,7 +237,6 @@ async function refreshToken(req, res) {
 
   try {
     const decoded = tokenHelper.verifyRefreshToken(refreshToken);
-
     if (!decoded) {
       return res.status(403).json({ message: "Invalid refresh token" });
     }
@@ -414,15 +429,17 @@ async function logUser(req, res) {
 }
 
 async function updateLocation(req, res) {
-  const { id } = req.params;
   const { estado, cidade, cep } = req.body;
 
   try {
-    const target = await db("usuarios").select("id_usuario", "ativo").where({ id_usuario: id }).first();
+    const target = await natureza.getUser(req)
+    if (!target.permissoes.includes("admin")) return res.status(403).json({ message: "Apenas administradores podem atualizar a localização." });
     if (!target) return res.status(404).json({ message: "User not found" });
     if (target.ativo === false) return res.status(403).json({ message: "Usuário inativo." });
 
-    await db("usuarios").update({ enderecos: { estado, cidade, cep } }).where({ id_usuario: id })
+    await db("usuarios").update({ enderecos: { estado, cidade, cep } }).where({ id_usuario: target.id_usuario })
+    const user = await natureza.getUser(req)
+    await schemas.createNew(user.schema.substring(4))
     return res.status(200).json({ message: "ok" })
   } catch (error) {
     console.error(
@@ -433,9 +450,57 @@ async function updateLocation(req, res) {
   }
 }
 
+async function hasSchemaForUser(req, res) {
+  const { refreshToken } = req.cookies
+  try {
+    const verToken = tokenHelper.verifyRefreshToken(refreshToken)
+    const { enderecos } = await db("usuarios").select("enderecos").where({ id_usuario: verToken.userId }).first()
+    const apiRes = await fetch(`https://brasilapi.com.br/api/ibge/municipios/v1/${enderecos.estado}`)
+    const json = await apiRes.json()
+    const { codigo_ibge } = json.find((e) => e.nome === enderecos.cidade)
+    if (!codigo_ibge) {
+      return res.status(404).json({ message: "Código IBGE não encontrado para seu endereço, o verifique nas configurações" })
+    }
+    const hasSchema = await db.schema.withSchema(`sch_${codigo_ibge}`).hasTable("emp")
+
+    if (hasSchema) {
+      return res.status(200).json({})
+    }
+    await schemas.createNew(`${codigo_ibge}`)
+    return res.status(200).json({ message: "Um novo Schema foi criado para sua região: " + codigo_ibge })
+  } catch (err) {
+    console.error(
+      "Error in hasSchemaForUser function controller.usuario.js",
+      err
+    );
+    return res.status(500).json({ message: "Ocorreu um erro interno no servidor." });
+  }
+}
+
+async function changeSchLocation(req, res) {
+  const newLoc = req.body
+  const userToken = req.cookies?.refreshToken
+  try {
+    const verToken = tokenHelper.verifyRefreshToken(userToken)
+    const userId = verToken.userId
+    const user = await natureza.getUser(req)
+    if (!user.permissoes.includes("admin")) return res.status(403).json({ message: "Apenas administradores podem atualizar a localização." });
+    await db("usuarios").update({ endereco_edit: newLoc }).where({ id_usuario: userId })
+    await schemas.createNew(newLoc.codigo_ibge)
+    return res.status(200).json({ message: "Localização de Schema atualizada com sucesso." })
+  } catch (err) {
+    console.error(
+      "Error in changeSchLocation function controller.usuario.js",
+      err
+    );
+    return res.status(500).json({ message: "Ocorreu um erro interno no servidor." });
+  }
+}
+
 export default {
   register,
   login,
+  changeSchLocation,
   getUserByEmail,
   getUserByToken,
   getOwnUserById,
@@ -447,4 +512,5 @@ export default {
   getAllUsers,
   logUser,
   updateLocation,
+  hasSchemaForUser
 };

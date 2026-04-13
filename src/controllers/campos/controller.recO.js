@@ -1,54 +1,5 @@
 import { db } from "../../database/postgres.js";
-
-async function getAllRecO(req, res) {
-  // Paginacao
-  let { page, pageSize } = req.params;
-  page = parseInt(page, 10);
-  pageSize = parseInt(pageSize, 10);
-  if (isNaN(page) || page < 0) page = 0;
-  if (isNaN(pageSize) || pageSize <= 0) pageSize = 10;
-  const { mes, ano, org } = req.query;
-
-  try {
-    let query = db("recO");
-
-    if (mes) {
-      query = query.whereRaw("SUBSTRING(data, 1, 2) = ?", [
-        mes.padStart(2, "0"),
-      ]);
-    }
-    if (org) {
-      query = query.whereRaw(`content ->> 'codOrgao' = '${String(org).padStart(2, "0")}'`)
-    }
-    if (ano) {
-      query = query.whereRaw("SUBSTRING(data, 3, 2) = ?", [
-        String(ano).substring(2, 4),
-      ]);
-    }
-
-    const totalCount = await query.clone().count("* as count");
-    const total = Math.ceil(totalCount[0]?.count / pageSize);
-
-    if (Number(page) >= Number(total)) {
-      page = Math.max(0, total - 1);
-    }
-
-    const response = await query
-      .clone()
-      .select("*")
-      .orderBy("id", "asc")
-      .offset(page * pageSize)
-      .limit(pageSize);
-
-    return res.status(200).json({ response, totalPages: total, currentPage: page });
-  } catch (error) {
-    console.error(
-      "error from getAllRecO function from /controllers/controller.recO.js",
-      error
-    );
-    return res.status(500).json({ message: "Ocorreu um erro interno no servidor." });
-  }
-}
+import natureza from "../../helpers/natureza.js";
 
 async function Inserir(req, res) {
   try {
@@ -119,7 +70,11 @@ async function InserirRecO(req, res) {
       }
     }
 
-    await db.batchInsert("recO", recO, 75)
+    let user
+
+    if (!req.body.sch) user = await natureza.getUser(req)
+
+    await db.batchInsert(`${user?.schema || req.body.sch}.recO`, recO, 75);
 
     return res.status(200).json({ message: "RecO inserido com sucesso!" });
   } catch (error) {
@@ -163,7 +118,7 @@ async function getRecOById(req, res) {
 
 async function updateRecO(req, res) {
   const { id } = req.params;
-  
+
   const recOData = req.body;
   const body = recOData.body;
   const index = recOData.index;
@@ -182,10 +137,10 @@ async function updateRecO(req, res) {
 
     if (insert.tipoRegistro == 10) {
       insert.content = await toUpdate[0].content.content;
-      
+
       await db("recO").where({ id }).update({ content: insert }).returning("*");
     } else {
-      
+
       toUpdate[0].content.content[index] = insert;
       await db("recO").where({ id }).update({ content: toUpdate[0].content });
     }
@@ -226,7 +181,6 @@ async function InserirRecOManual(req, res) {
 }
 
 export default {
-  getAllRecO,
   Inserir,
   InserirRecO,
   deleteRecO,

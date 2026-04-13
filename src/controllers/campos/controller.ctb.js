@@ -1,43 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import natureza from "../../helpers/natureza.js";
 import { db } from "../../database/postgres.js";
-async function getAllCtb(req, res) {
-  // Paginacao
-  let { page, pageSize } = req.params;
-  try {
-    const totalCount = await db("ctb").count("* as count");
-    if (totalCount[0].count == false) {
-      return res.status(200).json({});
-    }
-
-    const total = Math.ceil(totalCount[0]?.count / pageSize);
-
-    if (Number(page) >= Number(total)) {
-      page = total - 1;
-    }
-
-    const response = await db("ctb")
-      .select("*")
-      .orderBy("id", "asc")
-      .offset(page * pageSize)
-      .limit(pageSize);
-
-    if (response.length === 0) {
-      return res.status(404).json({ message: "Nenhum registro encontrado." });
-    }
-    return res
-      .status(200)
-      .json({ response, totalPages: total, currentPage: page });
-  } catch (error) {
-    console.error(
-      "error from getAllCtb function from /controllers/controller.ctb.js",
-      error,
-    );
-    return res
-      .status(500)
-      .json({ message: "Ocorreu um erro interno no servidor." });
-  }
-}
 
 async function Inserir(req, res) {
   try {
@@ -166,7 +129,7 @@ async function InserirCtb(req, res) {
       }
     }
 
-    const allOrgaos = await db("orgao").select("*")
+    const allOrgaos = await db(`${req.body.sch}.orgao`).select("*");
     const orgaoTypes = { ...Object.fromEntries(natureza.filterOrgaosByDate(allOrgaos.map((e) => e.content), data).map((e) => [e.codOrgao, e.tipoOrgao])) }
 
     ctb.forEach((ctbValue, ctbIndex) => {
@@ -182,7 +145,7 @@ async function InserirCtb(req, res) {
       }
     });
 
-    await db.batchInsert("ctb", ctb, 75)
+    await db.batchInsert(`${req.body.sch}.ctb`, ctb, 75);
 
     return res.status(200).json({ message: "CTB inserido com sucesso!" });
   } catch (error) {
@@ -190,7 +153,7 @@ async function InserirCtb(req, res) {
       "error from InserirCtb function from /controllers/controller.ctb.js",
       error,
     );
-    return res
+    return res  
       .status(500)
       .json({ message: "Ocorreu um erro interno no servidor." });
   }
@@ -299,7 +262,6 @@ async function contaUpdate(req, res) {
 }
 
 export default {
-  getAllCtb,
   Inserir,
   InserirCtb,
   deleteCtb,

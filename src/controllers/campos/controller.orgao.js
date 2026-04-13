@@ -1,38 +1,5 @@
 import { db } from "../../database/postgres.js";
-
-async function getAllOrgao(req, res) {
-  // Paginacao
-  let { page, pageSize } = req.params;
-  try {
-    const totalCount = await db("orgao").count("* as count");
-    if (totalCount[0].count == false) {
-      return res.status(200).json({});
-    }
-
-    const total = Math.ceil(totalCount[0]?.count / pageSize);
-
-    if (Number(page) >= Number(total)) {
-      page = total - 1;
-    }
-
-    const response = await db("orgao")
-      .select("*")
-      .orderBy("id", "asc")
-      .offset(page * pageSize)
-      .limit(pageSize);
-
-    if (response.length === 0) {
-      return res.status(404).json({ message: "Nenhum registro encontrado." });
-    }
-    return res.status(200).json({ response, totalPages: total, currentPage: page });
-  } catch (error) {
-    console.error(
-      "error from getAllOrgao function from /controllers/controller.orgao.js",
-      error
-    );
-    return res.status(500).json({ message: "Ocorreu um erro interno no servidor." });
-  }
-}
+import natureza from "../../helpers/natureza.js";
 
 async function Inserir(req, res) {
   try {
@@ -92,7 +59,8 @@ async function InserirOrgao(req, res) {
       }
     }
 
-    await db.batchInsert("orgao", orgao, 75)
+
+    await db.batchInsert(`${req.body.sch}.orgao`, orgao, 75);
 
     return res.status(200).json({ message: "ORGAO inserido com sucesso!" });
   } catch (error) {
@@ -159,7 +127,7 @@ async function updateOrgao(req, res) {
         .update({ content: insert })
         .returning("*");
     } else {
-      
+
       toUpdate[0].content.content[index] = insert;
       await db("orgao").where({ id }).update({ content: toUpdate[0].content });
     }
@@ -201,7 +169,13 @@ async function InserirOrgaoManual(req, res) {
 
 async function getOrgaoNames(req, res) {
   try {
-    const fetch = await db("orgao").select("*");
+    const user = await natureza.getUser(req)
+    const tableNames = await db.raw(`SELECT table_name 
+            FROM information_schema.tables 
+            WHERE table_schema = '${user.schema}'
+    `)
+    console.log(tableNames.rows, "TABLE NAMES")
+    const fetch = await db.withSchema(user.schema).table("orgao").select("*");
     const response = [];
     const dataNames = [];
     fetch.forEach((e) => {
@@ -226,7 +200,6 @@ async function getOrgaoNames(req, res) {
 }
 
 export default {
-  getAllOrgao,
   Inserir,
   InserirOrgao,
   deleteOrgao,

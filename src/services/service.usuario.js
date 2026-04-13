@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt";
 import { db } from "../database/postgres.js";
 
-async function register(nome, email, password, salt, cpf, telefone) {
+async function register({ nome, email, password, salt, cpf, telefone, endereco }) {
   try {
     cpf = cpf.replaceAll("-", "").replaceAll(".", "");
     const existingCpf = await db("usuarios").where({ cpf }).first();
@@ -22,7 +22,8 @@ async function register(nome, email, password, salt, cpf, telefone) {
         password: hashedPassword,
         cpf,
         telefone,
-        permissoes: ["admin"]
+        permissoes: ["admin"],
+        enderecos: endereco,
       })
       .returning("id_usuario");
 

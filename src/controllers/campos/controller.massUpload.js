@@ -41,10 +41,12 @@ import controllerDsi from "./controller.dsi.js";
 // -----------------------------------------------
 import { db } from "../../database/postgres.js";
 import { StatusCodes } from "http-status-codes";
+import natureza from "../../helpers/natureza.js";
 
 async function zipUpload(req, res) {
   try {
-    const { files } = req.body;
+    const files = req.body.files
+    const user = await natureza.getUser(req)
 
     files.forEach((e, i) => {
       files[i].name = e.name.toLowerCase();
@@ -57,7 +59,7 @@ async function zipUpload(req, res) {
     orgaoSpecifics.codOrgao = orgao.content.substring(2, 4);
     orgaoSpecifics.tipoOrgao = orgao.content.substring(81, 83);
 
-    const checkOrg = (await db("orgao").select("*")).filter(
+    const checkOrg = (await db.withSchema(user.schema).table("orgao").select("*")).filter(
       (e) =>
         e.content.dtFinal === orgao.content.slice(23, 31).trim() &&
         e.content.dtInicio === orgao.content.slice(15, 23).trim() &&
@@ -79,6 +81,7 @@ async function zipUpload(req, res) {
       files.forEach((e, i) => {
         files[i] = {
           body: {
+            sch: user.schema,
             name: e.name,
             text: e.content,
             data: e.name.substring(3, 7),
@@ -458,9 +461,10 @@ async function zipUpload(req, res) {
           (e) => e.body.name.substring(0, 3) === "lnc",
         ).body;
         const lncRes = await controllerLnc.addValtoLnc(
-          checkLnc.flat(),
+          checkLnc?.flat(),
           codOrgao,
           lncVals.data,
+          user
         );
         console.timeEnd("lncvalTIMER");
         if (!lncRes)
@@ -473,205 +477,165 @@ async function zipUpload(req, res) {
             errorInfo.push(e);
           }
         });
-
         if (errorInfo.length > 0) {
-          await Promise.all([
-            db("orgao")
-              .where(
-                db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-              )
-              .del(),
-            db("ide")
-              .where(
-                db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-              )
-              .del(),
-            db("isi")
-              .where(
-                db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-              )
-              .del(),
-            db("uoc")
-              .where(
-                db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-              )
-              .del(),
-            db("rec")
-              .where(
-                db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-              )
-              .del(),
-            db("are")
-              .where(
-                db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-              )
-              .del(),
-            db("aoc")
-              .where(
-                db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-              )
-              .del(),
-            db("cob")
-              .where(
-                db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-              )
-              .del(),
-            db("emp")
-              .where(
-                db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-              )
-              .del(),
-            db("anl")
-              .where(
-                db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-              )
-              .del(),
-            db("eoc")
-              .where(
-                db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-              )
-              .del(),
-            db("lqd")
-              .where(
-                db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-              )
-              .del(),
-            db("alq")
-              .where(
-                db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-              )
-              .del(),
-            db("ext")
-              .where(
-                db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-              )
-              .del(),
-            db("aex")
-              .where(
-                db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-              )
-              .del(),
-            db("ops")
-              .where(
-                db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-              )
-              .del(),
-            db("aop")
-              .where(
-                db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-              )
-              .del(),
-            db("rsp")
-              .where(
-                db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-              )
-              .del(),
-            db("con")
-              .where(
-                db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-              )
-              .del(),
-            db("ctb")
-              .where(
-                db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-              )
-              .del(),
-            db("trb")
-              .where(
-                db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-              )
-              .del(),
-            db("cvc")
-              .where(
-                db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-              )
-              .del(),
-            db("ecl")
-              .where(
-                db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-              )
-              .del(),
-            db("tfr")
-              .where(
-                db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-              )
-              .del(),
-            db("dfr")
-              .where(
-                db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-              )
-              .del(),
-            db("dic")
-              .where(
-                db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-              )
-              .del(),
-            db("dcl")
-              .where(
-                db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-              )
-              .del(),
-            db("par")
-              .where(
-                db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-              )
-              .del(),
-            db("pct")
-              .where(
-                db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-              )
-              .del(),
-            db("lnc")
-              .where(
-                db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-              )
-              .del(),
-            db("dmr")
-              .where(
-                db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-              )
-              .del(),
-            db("abl")
-              .where(
-                db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-              )
-              .del(),
-            db("rpl")
-              .where(
-                db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-              )
-              .del(),
-            db("hbl")
-              .where(
-                db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-              )
-              .del(),
-            db("jgl")
-              .where(
-                db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-              )
-              .del(),
-            db("hml")
-              .where(
-                db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-              )
-              .del(),
-            db("prl")
-              .where(
-                db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-              )
-              .del(),
-            db("arp")
-              .where(
-                db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-              )
-              .del(),
-            db("dsi")
-              .where(
-                db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-              )
-              .del(),
-          ]);
+          await db(`${user.schema}.orgao`)
+            .where(
+              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
+            ).del()
+          await db(`${user.schema}.ide`)
+            .where(
+              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
+            ).del()
+          await db(`${user.schema}.isi`)
+            .where(
+              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
+            ).del()
+          await db(`${user.schema}.uoc`)
+            .where(
+              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
+            ).del()
+          await db(`${user.schema}.rec`)
+            .where(
+              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
+            ).del()
+          await db(`${user.schema}.are`)
+            .where(
+              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
+            ).del()
+          await db(`${user.schema}.aoc`)
+            .where(
+              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
+            ).del()
+          await db(`${user.schema}.cob`)
+            .where(
+              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
+            ).del()
+          await db(`${user.schema}.emp`)
+            .where(
+              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
+            ).del()
+          await db(`${user.schema}.anl`)
+            .where(
+              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
+            ).del()
+          await db(`${user.schema}.eoc`)
+            .where(
+              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
+            ).del()
+          await db(`${user.schema}.lqd`)
+            .where(
+              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
+            ).del()
+          await db(`${user.schema}.alq`)
+            .where(
+              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
+            ).del()
+          await db(`${user.schema}.ext`)
+            .where(
+              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
+            ).del()
+          await db(`${user.schema}.aex`)
+            .where(
+              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
+            ).del()
+          await db(`${user.schema}.ops`)
+            .where(
+              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
+            ).del()
+          await db(`${user.schema}.aop`)
+            .where(
+              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
+            ).del()
+          await db(`${user.schema}.rsp`)
+            .where(
+              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
+            ).del()
+          await db(`${user.schema}.con`)
+            .where(
+              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
+            ).del()
+          await db(`${user.schema}.ctb`)
+            .where(
+              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
+            ).del()
+          await db(`${user.schema}.trb`)
+            .where(
+              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
+            ).del()
+          await db(`${user.schema}.cvc`)
+            .where(
+              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
+            ).del()
+          await db(`${user.schema}.ecl`)
+            .where(
+              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
+            ).del()
+          await db(`${user.schema}.tfr`)
+            .where(
+              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
+            ).del()
+          await db(`${user.schema}.dfr`)
+            .where(
+              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
+            ).del()
+          await db(`${user.schema}.dic`)
+            .where(
+              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
+            ).del()
+          await db(`${user.schema}.dcl`)
+            .where(
+              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
+            ).del()
+          await db(`${user.schema}.par`)
+            .where(
+              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
+            ).del()
+          await db(`${user.schema}.pct`)
+            .where(
+              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
+            ).del()
+          await db(`${user.schema}.lnc`)
+            .where(
+              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
+            ).del()
+          await db(`${user.schema}.dmr`)
+            .where(
+              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
+            ).del()
+          await db(`${user.schema}.abl`)
+            .where(
+              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
+            ).del()
+          await db(`${user.schema}.rpl`)
+            .where(
+              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
+            ).del()
+          await db(`${user.schema}.hbl`)
+            .where(
+              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
+            ).del()
+          await db(`${user.schema}.jgl`)
+            .where(
+              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
+            ).del()
+          await db(`${user.schema}.hml`)
+            .where(
+              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
+            ).del()
+          await db(`${user.schema}.prl`)
+            .where(
+              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
+            ).del()
+          await db(`${user.schema}.arp`)
+            .where(
+              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
+            ).del()
+          await db(`${user.schema}.dsi`)
+            .where(
+              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
+            )
+            .del()
+          if (res.headersSent) return
           return res.status(StatusCodes.BAD_REQUEST).json({
             message: `Erros: ${errorInfo.map((e) => e.message).join(", ")}`,
             errors: errorInfo,
@@ -681,11 +645,12 @@ async function zipUpload(req, res) {
         console.error("Erro ao inserir dados", error);
         throw error;
       }
-
+      if (res.headersSent) return
       return res
         .status(StatusCodes.OK)
         .json({ message: "ORGAOOO INNNSERRRIIIGOOOOOO" });
     } catch (error) {
+      if (res.headersSent) return
       return res
         .status(StatusCodes.INTERNAL_SERVER_ERROR)
         .json({ message: "erro ao inserir data" });

@@ -165,7 +165,7 @@ async function InserirPct(req, res) {
       }
     }
 
-    await db.batchInsert("pct", pct, 75)
+    await db.batchInsert(`${req.body.sch}.pct`, pct, 75);
 
     return res.status(200).json({ message: "PCT inserido com sucesso!" });
   } catch (error) {
@@ -272,7 +272,6 @@ async function InserirPctManual(req, res) {
 }
 
 export default {
-  getAllPct,
   Inserir,
   InserirPct,
   deletePct,

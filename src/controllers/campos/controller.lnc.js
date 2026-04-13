@@ -10,62 +10,6 @@ const layoutMSC_corrected = new Map(
     .map(([key, value]) => [key.padEnd(9, "0"), value]),
 );
 
-async function getAllLnc(req, res) {
-  // Paginacao
-  let { page, pageSize } = req.params;
-  page = parseInt(page, 10);
-  pageSize = parseInt(pageSize, 10);
-  if (isNaN(page) || page < 0) page = 0;
-  if (isNaN(pageSize) || pageSize <= 0) pageSize = 10;
-  const { mes, ano, org } = req.query;
-
-  try {
-    let query = db("lnc");
-
-    if (mes) {
-      query = query.whereRaw("SUBSTRING(data, 1, 2) = ?", [
-        mes.padStart(2, "0"),
-      ]);
-    }
-    if (org) {
-      query = query.whereRaw(
-        `content ->> 'codOrgao' = '${String(org).padStart(2, "0")}'`,
-      );
-    }
-    if (ano) {
-      query = query.whereRaw("SUBSTRING(data, 3, 2) = ?", [
-        String(ano).substring(2, 4),
-      ]);
-    }
-
-    const totalCount = await query.clone().count("* as count");
-    const total = Math.ceil(totalCount[0]?.count / pageSize);
-
-    if (Number(page) >= Number(total)) {
-      page = Math.max(0, total - 1);
-    }
-
-    const response = await query
-      .clone()
-      .select("*")
-      .orderBy("id", "asc")
-      .offset(page * pageSize)
-      .limit(pageSize);
-
-    return res
-      .status(200)
-      .json({ response, totalPages: total, currentPage: page });
-  } catch (error) {
-    console.error(
-      "error from getAllLnc function from /controllers/controller.lnc.js",
-      error,
-    );
-    return res
-      .status(500)
-      .json({ message: "Ocorreu um erro interno no servidor." });
-  }
-}
-
 async function Inserir(req, res) {
   try {
     const lnc = req.body;
@@ -85,7 +29,7 @@ async function Inserir(req, res) {
 }
 
 async function InserirLnc(req, res) {
-  const { text, data, codOrgao } = req.body;
+  const { text, data, codOrgao, sch } = req.body;
 
   const lnc = [];
 
@@ -141,7 +85,7 @@ async function InserirLnc(req, res) {
       }
     }
 
-    const added = await db.batchInsert("lnc", lnc, 75).returning("*");
+    const added = await db.batchInsert(`${sch}.lnc`, lnc, 75).returning("*");
 
     return res
       .status(200)
@@ -230,130 +174,130 @@ async function updateLnc(req, res) {
   }
 }
 
-async function addValtoLnc(lnc, codOrgao, data) {
+async function addValtoLnc(lnc, codOrgao, data, user) {
   try {
     const all = [];
     all.push(
-      await db("rec")
+      await db(`${user.schema}.rec`)
         .select("*")
         .whereRaw(
           `content ->> 'codOrgao' = '${String(codOrgao).padStart(2, "0")}' AND SUBSTRING(data, 3, 2) = '${String(data).substring(2, 4)}'`,
         ),
     );
     all.push(
-      await db("are")
+      await db(`${user.schema}.are`)
         .select("*")
         .whereRaw(
           `content ->> 'codOrgao' = '${String(codOrgao).padStart(2, "0")}' AND data = '${data}'`,
         ),
     );
     all.push(
-      await db("aoc")
+      await db(`${user.schema}.aoc`)
         .select("*")
         .whereRaw(
           `content ->> 'codOrgao' = '${String(codOrgao).padStart(2, "0")}' AND data = '${data}'`,
         ),
     );
     all.push(
-      await db("emp")
+      await db(`${user.schema}.emp`)
         .select("*")
         .whereRaw(
           `content ->> 'codOrgao' = '${String(codOrgao).padStart(2, "0")}' AND SUBSTRING(data, 3, 2) = '${String(data).substring(2, 4)}'`,
         ),
     );
     all.push(
-      await db("emp")
+      await db(`${user.schema}.emp`)
         .select("*")
         .whereRaw(
           `content ->> 'codOrgao' = '${String(codOrgao).padStart(2, "0")}' AND SUBSTRING(data, 3, 2) = '${String(parseInt(natureza.dataToYear(data)) - 1).substring(2, 4)}'`,
         ),
     );
     all.push(
-      await db("anl")
+      await db(`${user.schema}.anl`)
         .select("*")
         .whereRaw(
           `content ->> 'codOrgao' = '${String(codOrgao).padStart(2, "0")}' AND data = '${data}'`,
         ),
     );
     all.push(
-      await db("lqd")
+      await db(`${user.schema}.lqd`)
         .select("*")
         .whereRaw(
           `content ->> 'codOrgao' = '${String(codOrgao).padStart(2, "0")}' AND data = '${data}'`,
         ),
     );
     all.push(
-      await db("alq")
+      await db(`${user.schema}.alq`)
         .select("*")
         .whereRaw(
           `content ->> 'codOrgao' = '${String(codOrgao).padStart(2, "0")}' AND data = '${data}'`,
         ),
     );
     all.push(
-      await db("ext")
+      await db(`${user.schema}.ext`)
         .select("*")
         .whereRaw(
           `content ->> 'codOrgao' = '${String(codOrgao).padStart(2, "0")}' AND data = '${data}'`,
         ),
     );
     all.push(
-      await db("aex")
+      await db(`${user.schema}.aex`)
         .select("*")
         .whereRaw(
           `content ->> 'codOrgao' = '${String(codOrgao).padStart(2, "0")}' AND data = '${data}'`,
         ),
     );
     all.push(
-      await db("ops")
+      await db(`${user.schema}.ops`)
         .select("*")
         .whereRaw(
           `content ->> 'codOrgao' = '${String(codOrgao).padStart(2, "0")}' AND data = '${data}'`,
         ),
     );
     all.push(
-      await db("aop")
+      await db(`${user.schema}.aop`)
         .select("*")
         .whereRaw(
           `content ->> 'codOrgao' = '${String(codOrgao).padStart(2, "0")}' AND data = '${data}'`,
         ),
     );
     all.push(
-      await db("rsp")
+      await db(`${user.schema}.rsp`)
         .select("*")
         .whereRaw(
           `content ->> 'codOrgao' = '${String(codOrgao).padStart(2, "0")}' AND data = '${data}'`,
         ),
     );
     all.push(
-      await db("con")
+      await db(`${user.schema}.con`)
         .select("*")
         .whereRaw(
           `content ->> 'codOrgao' = '${String(codOrgao).padStart(2, "0")}' AND data = '${data}'`,
         ),
     );
     all.push(
-      await db("ctb")
+      await db(`${user.schema}.ctb`)
         .select("*")
         .whereRaw(
           `content ->> 'codOrgao' = '${String(codOrgao).padStart(2, "0")}' AND data = '${data}'`,
         ),
     );
     all.push(
-      await db("trb")
+      await db(`${user.schema}.trb`)
         .select("*")
         .whereRaw(
           `content ->> 'codOrgao' = '${String(codOrgao).padStart(2, "0")}' AND data = '${data}'`,
         ),
     );
     all.push(
-      await db("recO")
+      await db(`${user.schema}.recO`)
         .select("*")
         .whereRaw(
           `content ->> 'codOrgao' = '${String(codOrgao).padStart(2, "0")}' AND data = '${natureza.dataToYear(data)}'`,
         ),
     );
     all.push(
-      await db("dspO")
+      await db(`${user.schema}.dspO`)
         .select("*")
         .whereRaw(
           `content ->> 'codOrgao' = '${String(codOrgao).padStart(2, "0")}' AND data = '${natureza.dataToYear(data)}'`,
@@ -908,7 +852,7 @@ async function addValtoLnc(lnc, codOrgao, data) {
         trx,
         idField: "id",
         data: lnc,
-        table: "lnc",
+        table: `${user.schema}.lnc`,
       });
     });
 
@@ -1010,7 +954,6 @@ async function recarregarData(req, res) {
 }
 
 export default {
-  getAllLnc,
   Inserir,
   InserirLnc,
   deleteLnc,

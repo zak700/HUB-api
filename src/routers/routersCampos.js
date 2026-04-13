@@ -66,6 +66,13 @@ const routerCampos = Router();
 
 // Rota para a raiz da API
 
+routerCampos.get(
+  "/get-campo/:name/:page/:pageSize",
+  validateToken.authenticateToken,
+  validateToken.onlyAdmins,
+  controllerCampos.getCampo
+);
+
 routerCampos.post(
   "/campos/criarAnalize/:name",
   validateToken.authenticateToken,
@@ -154,6 +161,7 @@ routerCampos.post(
   "/zipUpload",
   validateToken.authenticateToken,
   validateToken.onlyAdmins,
+  validateToken.checkSchema,
   upload.single("arquivo"),
   controllerMassUpload.zipUpload
 );
@@ -235,18 +243,12 @@ validateToken.authenticateToken,
   validateToken.onlyAdmins,
   // Identidade do Município----------------------------------------------
 
-  routerCampos.get(
-    "/ide/:page/:pageSize",
+  routerCampos.post(
+    "/ide/inserir",
     validateToken.authenticateToken,
     validateToken.onlyAdmins,
-    controllerIde.getAllIde
+    controllerIde.Inserir
   );
-routerCampos.post(
-  "/ide/inserir",
-  validateToken.authenticateToken,
-  validateToken.onlyAdmins,
-  controllerIde.Inserir
-);
 routerCampos.post(
   "/ide/post-ide",
   validateToken.authenticateToken,
@@ -274,12 +276,6 @@ routerCampos.put(
 
 // ORGAO ----------------------------------------------------------
 
-routerCampos.get(
-  "/orgao/:page/:pageSize",
-  validateToken.authenticateToken,
-  validateToken.onlyAdmins,
-  controllerOrgao.getAllOrgao
-);
 routerCampos.get(
   "/orgao/names",
   validateToken.authenticateToken,
@@ -319,12 +315,6 @@ routerCampos.put(
 
 // Informações do Sistema de Informática----------------------------------------
 
-routerCampos.get(
-  "/isi/:page/:pageSize",
-  validateToken.authenticateToken,
-  validateToken.onlyAdmins,
-  controllerIsi.getAllIsi
-);
 routerCampos.post(
   "/isi/inserir",
   validateToken.authenticateToken,
@@ -358,12 +348,6 @@ routerCampos.put(
 
 // Unidade Orçamentária ----------------------------------------------------------
 
-routerCampos.get(
-  "/uoc/:page/:pageSize",
-  validateToken.authenticateToken,
-  validateToken.onlyAdmins,
-  controllerUoc.getAllUoc
-);
 routerCampos.post(
   "/uoc/inserir",
   validateToken.authenticateToken,
@@ -398,12 +382,6 @@ routerCampos.put(
 
 // Receita ---------------------------------------------------------------------
 
-routerCampos.get(
-  "/rec/:page/:pageSize",
-  validateToken.authenticateToken,
-  validateToken.onlyAdmins,
-  controllerRec.getAllRec
-);
 routerCampos.post(
   "/rec/inserir",
   validateToken.authenticateToken,
@@ -438,12 +416,6 @@ routerCampos.put(
 
 // Anulação de Receita ----------------------------------------------------------
 
-routerCampos.get(
-  "/are/:page/:pageSize",
-  validateToken.authenticateToken,
-  validateToken.onlyAdmins,
-  controllerAre.getAllAre
-);
 routerCampos.post(
   "/are/inserir",
   validateToken.authenticateToken,
@@ -478,12 +450,6 @@ routerCampos.put(
 
 // Alterações Orçamentárias ----------------------------------------------------------
 
-routerCampos.get(
-  "/aoc/:page/:pageSize",
-  validateToken.authenticateToken,
-  validateToken.onlyAdmins,
-  controllerAoc.getAllAoc
-);
 routerCampos.post(
   "/aoc/inserir",
   validateToken.authenticateToken,
@@ -518,12 +484,6 @@ routerCampos.put(
 
 // Cadastro de Obras em Andamento ----------------------------------------------------------
 
-routerCampos.get(
-  "/cob/:page/:pageSize",
-  validateToken.authenticateToken,
-  validateToken.onlyAdmins,
-  controllerCob.getAllCob
-);
 routerCampos.post(
   "/cob/inserir",
   validateToken.authenticateToken,
@@ -558,12 +518,6 @@ routerCampos.put(
 
 // Empenho ----------------------------------------------------------
 
-routerCampos.get(
-  "/emp/:page/:pageSize",
-  validateToken.authenticateToken,
-  validateToken.onlyAdmins,
-  controllerEmp.getAllEmp
-);
 routerCampos.post(
   "/emp/inserir",
   validateToken.authenticateToken,
@@ -598,12 +552,6 @@ routerCampos.put(
 
 // Anulação do Empenho ----------------------------------------------------------
 
-routerCampos.get(
-  "/anl/:page/:pageSize",
-  validateToken.authenticateToken,
-  validateToken.onlyAdmins,
-  controllerAnl.getAllAnl
-);
 routerCampos.post(
   "/anl/inserir",
   validateToken.authenticateToken,
@@ -638,12 +586,6 @@ routerCampos.put(
 
 // Vínculo de Empenho Existente com Obra e/ou Contrato------------------------------
 
-routerCampos.get(
-  "/eoc/:page/:pageSize",
-  validateToken.authenticateToken,
-  validateToken.onlyAdmins,
-  controllerEoc.getAllEoc
-);
 routerCampos.post(
   "/eoc/inserir",
   validateToken.authenticateToken,
@@ -678,12 +620,6 @@ routerCampos.put(
 
 // (LQD) Liquidação de Despesa------------------------------------------------
 
-routerCampos.get(
-  "/lqd/:page/:pageSize",
-  validateToken.authenticateToken,
-  validateToken.onlyAdmins,
-  controllerLqd.getAllLqd
-);
 routerCampos.post(
   "/lqd/inserir",
   validateToken.authenticateToken,
@@ -718,12 +654,6 @@ routerCampos.put(
 
 // (Alq) Anulação da Liquidação de Despesa-----------------------------------
 
-routerCampos.get(
-  "/alq/:page/:pageSize",
-  validateToken.authenticateToken,
-  validateToken.onlyAdmins,
-  controllerAlq.getAllAlq
-);
 routerCampos.post(
   "/alq/inserir",
   validateToken.authenticateToken,
@@ -758,12 +688,6 @@ routerCampos.put(
 
 // (Ext) ExtraOrçamentária --------------------------------------------------
 
-routerCampos.get(
-  "/ext/:page/:pageSize",
-  validateToken.authenticateToken,
-  validateToken.onlyAdmins,
-  controllerExt.getAllExt
-);
 routerCampos.post(
   "/ext/inserir",
   validateToken.authenticateToken,
@@ -798,12 +722,6 @@ routerCampos.put(
 
 // (Aex) Anulação de ExtraOrçamentária-------------------------------------
 
-routerCampos.get(
-  "/aex/:page/:pageSize",
-  validateToken.authenticateToken,
-  validateToken.onlyAdmins,
-  controllerAex.getAllAex
-);
 routerCampos.post(
   "/aex/inserir",
   validateToken.authenticateToken,
@@ -838,12 +756,6 @@ routerCampos.put(
 
 // (Ops) Ordens de Pagamento------------------------------------------
 
-routerCampos.get(
-  "/ops/:page/:pageSize",
-  validateToken.authenticateToken,
-  validateToken.onlyAdmins,
-  controllerOps.getAllOps
-);
 routerCampos.post(
   "/ops/inserir",
   validateToken.authenticateToken,
@@ -878,12 +790,6 @@ routerCampos.put(
 
 // (Aop) Anulações das Ordens de Pagamento------------------------------------------
 
-routerCampos.get(
-  "/aop/:page/:pageSize",
-  validateToken.authenticateToken,
-  validateToken.onlyAdmins,
-  controllerAop.getAllAop
-);
 routerCampos.post(
   "/aop/inserir",
   validateToken.authenticateToken,
@@ -918,12 +824,6 @@ routerCampos.put(
 
 // (Rsp) Movimentos de Restos a Pagar-------------------------------------
 
-routerCampos.get(
-  "/rsp/:page/:pageSize",
-  validateToken.authenticateToken,
-  validateToken.onlyAdmins,
-  controllerRsp.getAllRsp
-);
 routerCampos.post(
   "/rsp/inserir",
   validateToken.authenticateToken,
@@ -958,12 +858,6 @@ routerCampos.put(
 
 // (Con) Contratos----------------------------------------------------------
 
-routerCampos.get(
-  "/con/:page/:pageSize",
-  validateToken.authenticateToken,
-  validateToken.onlyAdmins,
-  controllerCon.getAllCon
-);
 routerCampos.post(
   "/con/inserir",
   validateToken.authenticateToken,
@@ -998,12 +892,6 @@ routerCampos.put(
 
 // (Ctb) Contas Bancárias e Caixa (Disponível)--------------------------------------
 
-routerCampos.get(
-  "/ctb/:page/:pageSize",
-  validateToken.authenticateToken,
-  validateToken.onlyAdmins,
-  controllerCtb.getAllCtb
-);
 
 routerCampos.put(
   "/ctb/update-conta",
@@ -1046,12 +934,6 @@ routerCampos.put(
 
 // (Trb) Transferências Bancárias-------------------------------------------------
 
-routerCampos.get(
-  "/trb/:page/:pageSize",
-  validateToken.authenticateToken,
-  validateToken.onlyAdmins,
-  controllerTrb.getAllTrb
-);
 routerCampos.post(
   "/trb/inserir",
   validateToken.authenticateToken,
@@ -1086,12 +968,6 @@ routerCampos.put(
 
 // (Cvc) Cadastro de Veículos em Situação de Consumo------------------------------
 
-routerCampos.get(
-  "/cvc/:page/:pageSize",
-  validateToken.authenticateToken,
-  validateToken.onlyAdmins,
-  controllerCvc.getAllCvc
-);
 routerCampos.post(
   "/cvc/inserir",
   validateToken.authenticateToken,
@@ -1126,12 +1002,6 @@ routerCampos.put(
 
 // (Ecl) Estoque de Combustível / Lubrificante----------------------------------------
 
-routerCampos.get(
-  "/ecl/:page/:pageSize",
-  validateToken.authenticateToken,
-  validateToken.onlyAdmins,
-  controllerEcl.getAllEcl
-);
 routerCampos.post(
   "/ecl/inserir",
   validateToken.authenticateToken,
@@ -1166,12 +1036,6 @@ routerCampos.put(
 
 // (Tfr) Transferência de Fontes de Recursos nas Contas Bancárias-----------------
 
-routerCampos.get(
-  "/tfr/:page/:pageSize",
-  validateToken.authenticateToken,
-  validateToken.onlyAdmins,
-  controllerTfr.getAllTfr
-);
 routerCampos.post(
   "/tfr/inserir",
   validateToken.authenticateToken,
@@ -1206,12 +1070,6 @@ routerCampos.put(
 
 // (Dfr) Detalhamento da Fonte de Recurso-----------------------------------------------
 
-routerCampos.get(
-  "/dfr/:page/:pageSize",
-  validateToken.authenticateToken,
-  validateToken.onlyAdmins,
-  controllerDfr.getAllDfr
-);
 routerCampos.post(
   "/dfr/inserir",
   validateToken.authenticateToken,
@@ -1246,12 +1104,6 @@ routerCampos.put(
 
 // (Dic) Dívida Consolidada-------------------------------------------
 
-routerCampos.get(
-  "/dic/:page/:pageSize",
-  validateToken.authenticateToken,
-  validateToken.onlyAdmins,
-  controllerDic.getAllDic
-);
 routerCampos.post(
   "/dic/inserir",
   validateToken.authenticateToken,
@@ -1286,12 +1138,6 @@ routerCampos.put(
 
 // (Dcl) Dados Complementares à LRF-------------------------------------------
 
-routerCampos.get(
-  "/dcl/:page/:pageSize",
-  validateToken.authenticateToken,
-  validateToken.onlyAdmins,
-  controllerDcl.getAllDcl
-);
 routerCampos.post(
   "/dcl/inserir",
   validateToken.authenticateToken,
@@ -1326,12 +1172,6 @@ routerCampos.put(
 
 // (Par) Projeção Atuarial do RPPS-------------------------------------------------
 
-routerCampos.get(
-  "/par/:page/:pageSize",
-  validateToken.authenticateToken,
-  validateToken.onlyAdmins,
-  controllerPar.getAllPar
-);
 routerCampos.post(
   "/par/inserir",
   validateToken.authenticateToken,
@@ -1366,12 +1206,6 @@ routerCampos.put(
 
 // (Pct) Plano de Contas-----------------------------------------------------------
 
-routerCampos.get(
-  "/pct/:page/:pageSize",
-  validateToken.authenticateToken,
-  validateToken.onlyAdmins,
-  controllerPct.getAllPct
-);
 routerCampos.post(
   "/pct/inserir",
   validateToken.authenticateToken,
@@ -1406,12 +1240,6 @@ routerCampos.put(
 
 // (Lnc) Lançamentos Contábeis------------------------------------------------------
 
-routerCampos.get(
-  "/lnc/:page/:pageSize",
-  validateToken.authenticateToken,
-  validateToken.onlyAdmins,
-  controllerLnc.getAllLnc
-);
 routerCampos.get(
   "/lnc/getInvalid",
   validateToken.authenticateToken,
@@ -1460,12 +1288,6 @@ routerCampos.put(
 
 // (Dmr) Decreto Municipal Regulamentador do Pregão / Registro de preços-----------------
 
-routerCampos.get(
-  "/dmr/:page/:pageSize",
-  validateToken.authenticateToken,
-  validateToken.onlyAdmins,
-  controllerDmr.getAllDmr
-);
 routerCampos.post(
   "/dmr/inserir",
   validateToken.authenticateToken,
@@ -1500,12 +1322,6 @@ routerCampos.put(
 
 // (Abl) Abertura da Licitação----------------------------------------------------------
 
-routerCampos.get(
-  "/abl/:page/:pageSize",
-  validateToken.authenticateToken,
-  validateToken.onlyAdmins,
-  controllerAbl.getAllAbl
-);
 routerCampos.post(
   "/abl/inserir",
   validateToken.authenticateToken,
@@ -1540,12 +1356,6 @@ routerCampos.put(
 
 // (Rpl) Responsável pela Licitação--------------------------------------------------
 
-routerCampos.get(
-  "/rpl/:page/:pageSize",
-  validateToken.authenticateToken,
-  validateToken.onlyAdmins,
-  controllerRpl.getAllRpl
-);
 routerCampos.post(
   "/rpl/inserir",
   validateToken.authenticateToken,
@@ -1580,12 +1390,6 @@ routerCampos.put(
 
 // (Hbl) Habilitação da Licitação------------------------------------------------
 
-routerCampos.get(
-  "/hbl/:page/:pageSize",
-  validateToken.authenticateToken,
-  validateToken.onlyAdmins,
-  controllerHbl.getAllHbl
-);
 routerCampos.post(
   "/hbl/inserir",
   validateToken.authenticateToken,
@@ -1620,12 +1424,6 @@ routerCampos.put(
 
 // (Jgl) Julgamento da Licitação----------------------------------------------------
 
-routerCampos.get(
-  "/jgl/:page/:pageSize",
-  validateToken.authenticateToken,
-  validateToken.onlyAdmins,
-  controllerJgl.getAllJgl
-);
 routerCampos.post(
   "/jgl/inserir",
   validateToken.authenticateToken,
@@ -1660,12 +1458,6 @@ routerCampos.put(
 
 // (Hml) Homologação da Licitação------------------------------------------------
 
-routerCampos.get(
-  "/hml/:page/:pageSize",
-  validateToken.authenticateToken,
-  validateToken.onlyAdmins,
-  controllerHml.getAllHml
-);
 routerCampos.post(
   "/hml/inserir",
   validateToken.authenticateToken,
@@ -1700,12 +1492,6 @@ routerCampos.put(
 
 // (Prl) Parecer da Licitação----------------------------------------------------------
 
-routerCampos.get(
-  "/prl/:page/:pageSize",
-  validateToken.authenticateToken,
-  validateToken.onlyAdmins,
-  controllerPrl.getAllPrl
-);
 routerCampos.post(
   "/prl/inserir",
   validateToken.authenticateToken,
@@ -1740,12 +1526,6 @@ routerCampos.put(
 
 // (Arp) Adesão a Registro de Preços-------------------------------------------------
 
-routerCampos.get(
-  "/arp/:page/:pageSize",
-  validateToken.authenticateToken,
-  validateToken.onlyAdmins,
-  controllerArp.getAllArp
-);
 routerCampos.post(
   "/arp/inserir",
   validateToken.authenticateToken,
@@ -1780,12 +1560,6 @@ routerCampos.put(
 
 // (Dsi) Dispensa ou Inexigibilidade-------------------------------------------------
 
-routerCampos.get(
-  "/dsi/:page/:pageSize",
-  validateToken.authenticateToken,
-  validateToken.onlyAdmins,
-  controllerDsi.getAllDsi
-);
 routerCampos.post(
   "/dsi/inserir",
   validateToken.authenticateToken,
@@ -1820,12 +1594,6 @@ routerCampos.put(
 
 // RECo -------------------------------------------
 
-routerCampos.get(
-  "/reco/:page/:pageSize",
-  validateToken.authenticateToken,
-  validateToken.onlyAdmins,
-  controllerReco.getAllRecO
-);
 routerCampos.post(
   "/reco/inserir",
   validateToken.authenticateToken,
@@ -1860,12 +1628,6 @@ routerCampos.put(
 
 // RECo -------------------------------------------
 
-routerCampos.get(
-  "/dspo/:page/:pageSize",
-  validateToken.authenticateToken,
-  validateToken.onlyAdmins,
-  controllerDspo.getAllDspO
-);
 routerCampos.post(
   "/dspo/inserir",
   validateToken.authenticateToken,
@@ -1884,6 +1646,7 @@ routerCampos.delete(
   validateToken.onlyAdmins,
   controllerDspo.deleteDspO
 );
+
 routerCampos.get(
   "/dspo/:id",
   validateToken.authenticateToken,

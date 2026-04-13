@@ -220,7 +220,7 @@ async function criarAnalize(req, res) {
 
 async function enviarJson(req, res) {
   try {
-    const { name } = req.params;
+    const user = await natureza.getUser(req)
     const file = req.file;
     if (!file) {
       return res.status(400).json({ message: "No file uploaded." });
@@ -231,7 +231,7 @@ async function enviarJson(req, res) {
 
     await Promise.all(obj.campo.map((e) => {
       delete e.id
-      return db(obj.name).insert(e)
+      return db(`${user.schema}.${obj.name}`).insert(e)
     }))
 
     return res.status(200).json({ message: "File uploaded and data inserted successfully." });
@@ -248,8 +248,9 @@ async function novo_registro(req, res) {
   try {
     const { name } = req.params;
     const { data } = req.body
+    const user = await natureza.getUser(req)
 
-    const lastOne = await db(name).select("*").where({ id: data.id }).first()
+    const lastOne = await db(`${user.schema}.${name}`).select("*").where({ id: data.id }).first()
 
     if (!lastOne || lastOne?.length === 0) res.status(404).json({ message: "id was not encountered" })
 
@@ -258,9 +259,13 @@ async function novo_registro(req, res) {
       obj[e.databaseName] = e.value
     })
 
-    lastOne.content.content.push(obj)
+    if ("content" in lastOne) {
+      lastOne.content.content.push(obj)
+    } else {
+      lastOne.content = { content: [obj] }
+    }
 
-    await db(name).where({ id: data.id }).update({ content: lastOne.content })
+    await db(`${user.schema}.${name}`).where({ id: data.id }).update({ content: lastOne.content })
 
     return res.status(200).json({ message: "File uploaded and data inserted successfully." });
   } catch (error) {
@@ -276,16 +281,17 @@ async function editarRegistro(req, res) {
   try {
     const { name, id } = req.params;
     const { data, index } = req.body
+    const user = await natureza.getUser(req)
     const dbName = { dspo: "dspO", reco: "recO" }[name] || name
 
-    const lastOne = await db(dbName).select("*").where({ id }).first()
+    const lastOne = await db(`${user.schema}.${dbName}`).select("*").where({ id }).first()
     if (!lastOne || lastOne?.length === 0) res.status(404).json({ message: "id was not encountered" })
 
     index === null ? lastOne.content = data : lastOne.content.content[index] = data
 
     console.log(lastOne.content)
 
-    await db(dbName).where({ id }).update({ content: lastOne.content })
+    await db(`${user.schema}.${dbName}`).where({ id }).update({ content: lastOne.content })
 
     return res.status(200).json({ message: "Registro atualizado com sucesso." });
   } catch (error) {
@@ -300,16 +306,18 @@ async function editarRegistro(req, res) {
 async function deleteCampo(req, res) {
   try {
     const { name, id, subId } = req.params;
+    const user = await natureza.getUser(req)
+    if (!user.permissoes.includes("admin")) return res.status(403).json({ message: "Apenas administradores podem deletar registros." });
     if (subId) {
       const dbName = { dspo: "dspO", reco: "recO" }[name] || name
-      const lastOne = await db(dbName).select("*").where({ id }).first()
+      const lastOne = await db(`${user.schema}.${dbName}`).select("*").where({ id }).first()
       if (!lastOne || lastOne?.length === 0) res.status(404).json({ message: "id was not encountered" })
       lastOne.content.content = lastOne.content.content.filter((_, index) => index.toString() !== subId)
-      await db(dbName).where({ id }).update({ content: lastOne.content })
+      await db(`${user.schema}.${dbName}`).where({ id }).update({ content: lastOne.content })
       return res.status(200).json({ message: "Registro deletado com sucesso." });
     } else {
       const dbName = { dspo: "dspO", reco: "recO" }[name] || name
-      await db(dbName).where({ id }).del()
+      await db(`${user.schema}.${dbName}` ).where({ id }).del()
       return res.status(200).json({ message: "Registro deletado com sucesso." });
     }
   } catch (error) {
@@ -324,23 +332,17 @@ async function deleteCampo(req, res) {
 async function getAsJson(req, res) {
   try {
     const name = { dspo: "dspO", reco: "recO", org: "orgao" }[req.params.name] || req.params.name;
-
+    const user = await natureza.getUser(req)
     // fetch all rows from the table
-    const campo = await db(name).select("*");
+    const campo = await db(`${user.schema}.${name}`).select("*");
 
-    const token = req.cookies?.refreshToken
-    if (!token) return res.status(400).json({ message: "Erro ao determinar usuário" })
-
-    const decoded = tokenHelper.verifyRefreshToken(token);
-    const user = await db("usuarios").select(["nome", "email", "id_usuario"]).where({ id_usuario: decoded.userId }).first()
-
-    const output = { name, campo, at: new Date().toLocaleDateString("pt-BR"), by: user }
+    const output = { name, campo, at: new Date().toLocaleDateString("pt-BR"), by: user.id_usuario }
 
     return res.status(StatusCodes.OK).json(JSON.stringify(output, null, 2))
 
   } catch (error) {
     console.error(
-      "error from getAsCsv function from /controllers/campos/controller.campos_getAll.js",
+      "error from getAsJson function from /controllers/campos/controller.campos_getAll.js",
       error
     );
     return res.status(500).json({ message: "Internal server error." });

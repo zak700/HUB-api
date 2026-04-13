@@ -1,5 +1,7 @@
 import { db } from "../database/postgres.js";
 
+import tokenHelper from "./tokens.js"
+
 const natureza = {
   PO_values: {
     "01": "10131",
@@ -18,6 +20,54 @@ const natureza = {
     14: "10131",
     15: "10131",
     16: "10131",
+  },
+
+  /**
+   * @typedef {Object} enderecoType
+   * @property {String} cidade
+   * @property {String} estado
+   * @property {String} codigo_ibge
+   */
+  /**
+   * 
+   * @typedef {Object} userContent
+   * @property {Number} [id_usuario]
+   * @property {String} [nome]
+   * @property {String} [email]
+   * @property {String} [password]
+   * @property {Buffer} [pfp_image]
+   * @property {String} [cpf]
+   * @property {String} [telefone]
+   * @property {enderecoType} [enderecos]
+   * @property {Boolean} [ativo]
+   * @property {Array} [permissoes]
+   * @property {enderecoType} [endereco_edit]
+   * @property {String} [schema] - added by the function
+   */
+  /**
+   * @returns {Promise<userContent|null>}
+   */
+  getUser: async function (req) {
+    const userToken = req.cookies?.refreshToken;
+
+    if (!userToken) {
+      return res.status(401).json({ message: "No token provided" });
+    }
+
+    try {
+      const decoded = tokenHelper.verifyRefreshToken(userToken);
+      const user = await db("usuarios")
+        .select("*")
+        .where({ id_usuario: decoded.userId })
+        .first();
+      user.schema = user.enderecos.codigo_ibge
+      if (user.endereco_edit) user.schema = user.endereco_edit.codigo_ibge
+      user.schema = `sch_${user.schema}`
+      return user
+    } catch (err) {
+      console.error(err)
+      return null
+    }
   },
   // filter by consolidados
   filterOrg: function (toFilter, orgao, consolidado) {
@@ -112,12 +162,12 @@ const natureza = {
     if (string.includes(".")) {
       return Dash
         ? "-" +
-            dots(string.split(".")[0].substring(1)) +
-            "," +
-            string.split(".")[1].padEnd(2, "0")
+        dots(string.split(".")[0].substring(1)) +
+        "," +
+        string.split(".")[1].padEnd(2, "0")
         : dots(string.split(".")[0]) +
-            "," +
-            string.split(".")[1].padEnd(2, "0");
+        "," +
+        string.split(".")[1].padEnd(2, "0");
     } else {
       return Dash
         ? "-" + dots(string.substring(1)) + ",00"
@@ -271,9 +321,9 @@ const natureza = {
         (consolidado !== "false"
           ? ""
           : `content ->> 'codOrgao' = '${orgao.substring(2, "0")}' AND `) +
-          this.fromToData(dataI, dataF, dataType)
-            .map((e) => `data = '${e}'`)
-            .join(" OR "),
+        this.fromToData(dataI, dataF, dataType)
+          .map((e) => `data = '${e}'`)
+          .join(" OR "),
       );
       return await db(campo)
         .select("*")
@@ -281,9 +331,9 @@ const natureza = {
           (consolidado !== "false"
             ? ""
             : `content ->> 'codOrgao' = '${orgao.substring(2, "0")}' AND `) +
-            this.fromToData(dataI, dataF)
-              .map((e) => `data = '${e}'`)
-              .join(" OR "),
+          this.fromToData(dataI, dataF)
+            .map((e) => `data = '${e}'`)
+            .join(" OR "),
         );
     } else if (dataType === "bi") {
       return res.filter((e) => {
@@ -293,11 +343,11 @@ const natureza = {
             "12" + String(parseInt(dataF.substring(2, 4)) - 1).padStart(2, "0");
           if (
             parseInt(newData.substring(2, 4)) <
-              parseInt(dataI.substring(2, 4)) ||
+            parseInt(dataI.substring(2, 4)) ||
             (parseInt(newData.substring(2, 4)) ==
               parseInt(dataI.substring(2, 4)) &&
               parseInt(newData.substring(0, 2)) <=
-                parseInt(dataI.substring(0, 2)))
+              parseInt(dataI.substring(0, 2)))
           ) {
             newData = dataI;
           }
@@ -307,11 +357,11 @@ const natureza = {
             dataF.substring(2, 4);
           if (
             parseInt(newData.substring(2, 4)) <
-              parseInt(dataI.substring(2, 4)) ||
+            parseInt(dataI.substring(2, 4)) ||
             (parseInt(newData.substring(2, 4)) ==
               parseInt(dataI.substring(2, 4)) &&
               parseInt(newData.substring(0, 2)) <=
-                parseInt(dataI.substring(0, 2)))
+              parseInt(dataI.substring(0, 2)))
           ) {
             newData = dataI;
           }

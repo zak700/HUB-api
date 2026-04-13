@@ -3,9 +3,6 @@ import { db } from "../database/postgres.js"
 async function create_default_tables(req, res) {
   try {
     await db.raw(`
-
-        
-
       CREATE TABLE IF NOT EXISTS public.abl (
           id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
           content json NOT NULL,
@@ -52,12 +49,6 @@ async function create_default_tables(req, res) {
           id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
           content json NOT NULL,
           data character varying(4) NOT NULL
-      );
-
-      CREATE TABLE IF NOT EXISTS public.candidatos (
-          id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-          data json NOT NULL,
-          id_usuario integer NOT NULL
       );
 
       CREATE TABLE IF NOT EXISTS public.cob (

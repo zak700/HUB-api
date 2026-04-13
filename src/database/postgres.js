@@ -32,7 +32,7 @@ async function connectWithRetry(retries = 10, wait = 3000) {
       console.log("✅ Conectado ao PostgreSQL!");
       return;
     } catch (error) {
-      console.log(`❌ Tentativa ${i} falhou: ${error.code || error.message}`);
+      console.log(`❌ Tentativa ${i} falhou: ${error.code || error.message}\nat: C:\\Users\\isacc\\Documents\\newHub\\hub-api\\src\\database\\postgres.js:35`);
       
       if (i === retries) {
         console.error("💥 Não foi possível conectar ao banco.");

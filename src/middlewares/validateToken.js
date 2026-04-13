@@ -1,6 +1,8 @@
 import jwt from "jsonwebtoken";
 import { db } from "../database/postgres.js";
 import rateLimit from "express-rate-limit"
+import schemas from "../helpers/schemas.js";
+import natureza from "../helpers/natureza.js";
 
 
 
@@ -11,7 +13,6 @@ const authenticateToken = async (req, res, next) => {
   }
   try {
     const decoded = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
-    req.user = decoded;
   } catch (err) {
     console.error("Erro ao verificar o token:", err.message || err);
     return res.status(403).json({ message: "Token inválido" });
@@ -40,8 +41,8 @@ const attachUser = async (req, res, next) => {
   if (!token) return res.status(401).json({ message: "Token não fornecido" });
 
   try {
-    const decoded = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
-    req.user = decoded;
+    const user = await natureza.getUser(req)
+    req.user = user;
     return next();
   } catch (err) {
     console.error("Erro ao anexar usuário:", err.message || err);
@@ -51,26 +52,17 @@ const attachUser = async (req, res, next) => {
 
 const onlyAdmins = async (req, res, next) => {
   try {
-    const decoded = req.user || jwt.verify(req.cookies?.refreshToken || "", process.env.REFRESH_TOKEN_SECRET);
-
-    const user = await db("usuarios")
-      .select("permissoes", "ativo")
-      .where({ id_usuario: decoded.userId })
-      .first();
-
-      // console.log(decoded)
-
+    const user = await natureza.getUser(req)
+    
     if (!user || !user.ativo) {
       return res.status(403).json({ message: "Usuário não encontrado ou inativo." });
     }
 
     const isAdmin = user.permissoes.includes("admin");
     if (!isAdmin) {
-      console.warn(`Tentativa de acesso não autorizado: usuário ${decoded.userId}`);
+      console.warn(`Tentativa de acesso não autorizado: usuário ${user.id_usuario}`);
       return res.status(403).json({ message: "Acesso negado." });
     }
-
-    req.user = decoded;
     next();
   } catch (err) {
     console.error("Erro ao verificar o token:", err.message || err);
@@ -79,32 +71,22 @@ const onlyAdmins = async (req, res, next) => {
 }
 
 const normalUserPerm = async (req, res, next) => {
-  const id = req.body?.id || req.params?.id;
-
-  if (!id) return res.status(400).json({ message: "ID ausente." });
-  if (!/^\d+$/.test(String(id))) return res.status(400).json({ message: "ID inválido." });
 
   try {
-    const decoded = req.user || jwt.verify(req.cookies?.refreshToken || "", process.env.REFRESH_TOKEN_SECRET);
-
-    const user = await db("usuarios")
-      .select("permissoes", "ativo")
-      .where({ id_usuario: decoded.userId })
-      .first();
+    const user = await natureza.getUser(req)
 
     if (!user || !user.ativo) {
       return res.status(403).json({ message: "Usuário não encontrado ou inativo." });
     }
 
     const isAdmin = user.permissoes?.includes("admin");
-    const isOwnData = Number(id) === Number(decoded.userId);
 
-    if (!isAdmin && !isOwnData) {
-      console.warn(`Tentativa de acesso não autorizado: usuário ${decoded.userId} acessando ${id}`);
+    if (!isAdmin) {
+      console.warn(`Tentativa de acesso não autorizado: usuário ${user.id_usuario} acessando ${id}`);
       return res.status(403).json({ message: "Acesso negado." });
     }
 
-    req.user = decoded;
+    req.user = user;
     next();
   } catch (err) {
     console.error("Erro ao verificar token:", err.message || err);
@@ -112,4 +94,15 @@ const normalUserPerm = async (req, res, next) => {
   }
 };
 
-export default { authenticateToken, onlyAdmins, normalUserPerm, attachUser, normalUserPermLimiter: rateLimiter };
+const checkSchema = async (req, res, next) => {
+  try {
+    const user = await natureza.getUser(req)
+    await schemas.createNew(user.schema.substring(4))
+    next()
+  } catch (err) {
+    console.error("Erro ao checar schema:", err.message || err);
+    return res.status(403).json({ message: "Token inválido" });
+  }
+}
+
+export default { authenticateToken, onlyAdmins, normalUserPerm, attachUser, checkSchema, normalUserPermLimiter: rateLimiter };

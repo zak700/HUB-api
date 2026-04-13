@@ -19,9 +19,7 @@ usersRouter.get(
 );
 
 usersRouter.get(
-  "/usuarios/own/id/:id",
-  validateToken.normalUserPermLimiter,
-  validateToken.normalUserPerm,
+  "/usuarios/own/id",
   controllerUsuario.getOwnUserById,
 );
 
@@ -54,6 +52,18 @@ usersRouter.post(
   controllerUsuario.refreshToken
 );
 
+usersRouter.put(
+  "/usuarios/change-sch-location",
+  validateToken.authenticateToken,
+  validateToken.onlyAdmins,
+  controllerUsuario.changeSchLocation
+)
+
+usersRouter.get(
+  "/has/schema",
+  controllerUsuario.hasSchemaForUser
+)
+
 usersRouter.post(
   "/usuarios/logout",
   validateToken.authenticateToken,
@@ -74,9 +84,8 @@ usersRouter.put(
 );
 
 usersRouter.put(
-  "/usuarios/update/location/:id",
-  validateToken.normalUserPermLimiter,
-  validateToken.normalUserPerm,
+  "/usuarios/update/location",
+  validateToken.authenticateToken,
   controllerUsuario.updateLocation
 );
 

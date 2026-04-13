@@ -1,53 +1,4 @@
 import { db } from "../../database/postgres.js";
-async function getAllArp(req, res) {
-  // Paginacao
-  let { page, pageSize } = req.params;
-  page = parseInt(page, 10);
-  pageSize = parseInt(pageSize, 10);
-  if (isNaN(page) || page < 0) page = 0;
-  if (isNaN(pageSize) || pageSize <= 0) pageSize = 10;
-  const { mes, ano, org } = req.query;
-
-  try {
-    let query = db("arp");
-
-    if (mes) {
-      query = query.whereRaw("SUBSTRING(data, 1, 2) = ?", [
-        mes.padStart(2, "0"),
-      ]);
-    }
-    if (org) {
-      query = query.whereRaw(`content ->> 'codOrgao' = '${String(org).padStart(2, "0")}'`)
-    }
-    if (ano) {
-      query = query.whereRaw("SUBSTRING(data, 3, 2) = ?", [
-        String(ano).substring(2, 4),
-      ]);
-    }
-
-    const totalCount = await query.clone().count("* as count");
-    const total = Math.ceil(totalCount[0]?.count / pageSize);
-
-    if (Number(page) >= Number(total)) {
-      page = Math.max(0, total - 1);
-    }
-
-    const response = await query
-      .clone()
-      .select("*")
-      .orderBy("id", "asc")
-      .offset(page * pageSize)
-      .limit(pageSize);
-
-    return res.status(200).json({ response, totalPages: total, currentPage: page });
-  } catch (error) {
-    console.error(
-      "error from getAllArp function from /controllers/controller.arp.js",
-      error
-    );
-    return res.status(500).json({ message: "Ocorreu um erro interno no servidor." });
-  }
-}
 
 async function Inserir(req, res) {
   try {
@@ -189,7 +140,7 @@ async function InserirArp(req, res) {
       }
     }
 
-    await db.batchInsert("arp", arp, 75)
+    await db.batchInsert(`${req.body.sch}.arp`, arp, 75);
 
     return res.status(200).json({ message: "ARP inserido com sucesso!" });
   } catch (error) {
@@ -293,7 +244,6 @@ async function InserirArpManual(req, res) {
 }
 
 export default {
-  getAllArp,
   Inserir,
   InserirArp,
   deleteArp,

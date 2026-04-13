@@ -46,6 +46,7 @@ const campos = [
 
 async function deleteCampos(req, res) {
   try {
+    const user = await natureza.getUser(req)
     const [date, org] = [req.params.date.split("-")[0], req.params.date.split("-")[1].padStart(2, "0")]
     let whereStr = ""
     
@@ -60,15 +61,66 @@ async function deleteCampos(req, res) {
             : await db(campos[name]).delete()
         } catch {
           // console.log(`'${date.substring(0, 2)}${natureza.dataToYear(date)}' ${campos[name]}`)
-          await db(campos[name]).whereRaw(`SUBSTRING(content ->> 'dtInicio', 3, 6) = '${date.substring(0, 2)}${natureza.dataToYear(date)}'`).delete()
+          await db(`${user.schema}.${campos[name]}`).whereRaw(`SUBSTRING(content ->> 'dtInicio', 3, 6) = '${date.substring(0, 2)}${natureza.dataToYear(date)}'`).delete()
         }
       } else {
-        await db(campos[name]).delete()
+        await db(`${user.schema}.${campos[name]}`).delete()
       }
     }
     res.status(200).json({ message: "Todos os campos deletados com sucesso" });
   } catch (error) {
     console.error("Error in deleteCampos function controller.campos.js", error);
+    return res.status(500).json({ message: "Ocorreu um erro interno no servidor." });
+  }
+}
+
+async function getCampo(req, res) {
+  // Paginacao
+  let { page, pageSize, name } = req.params;
+  page = parseInt(page, 10);
+  pageSize = parseInt(pageSize, 10);
+  if (isNaN(page) || page < 0) page = 0;
+  if (isNaN(pageSize) || pageSize <= 0) pageSize = 10;
+  const { mes, ano, org } = req.query;
+  const user = await natureza.getUser(req)
+  console.log(user.schema)
+  try {
+    let query = db(`${user.schema}.${name}`);
+
+    if (mes) {
+      query = query.whereRaw("SUBSTRING(data, 1, 2) = ?", [
+        mes.padStart(2, "0"),
+      ]);
+    }
+    if (org) {
+      query = query.whereRaw(`content ->> 'codOrgao' = '${String(org).padStart(2, "0")}'`)
+    }
+    if (ano) {
+      query = query.whereRaw("SUBSTRING(data, 3, 2) = ?", [
+        String(ano).substring(2, 4),
+      ]);
+    }
+
+    const totalCount = await query.clone().count("* as count");
+    const total = Math.ceil(totalCount[0]?.count / pageSize);
+
+    if (Number(page) >= Number(total)) {
+      page = Math.max(0, total - 1);
+    }
+
+    const response = await query
+      .clone()
+      .select("*")
+      .orderBy("id", "asc")
+      .offset(page * pageSize)
+      .limit(pageSize);
+
+    return res.status(200).json({ response, totalPages: total, currentPage: page });
+  } catch (error) {
+    console.error(
+      "error from getAllAre function from /controllers/controller.are.js",
+      error
+    );
     return res.status(500).json({ message: "Ocorreu um erro interno no servidor." });
   }
 }
@@ -112,4 +164,4 @@ async function updateTable(req, res) {
   }
 }
 
-export default { deleteCampos, getAllFromTable, updateTable };
+export default { deleteCampos, getAllFromTable, updateTable, getCampo };
