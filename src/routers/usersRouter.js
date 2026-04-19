@@ -89,4 +89,10 @@ usersRouter.put(
   controllerUsuario.updateLocation
 );
 
+usersRouter.get(
+  "/navinfo",
+  validateToken.authenticateToken,
+  controllerUsuario.getNavInfo
+)
+
 export default usersRouter

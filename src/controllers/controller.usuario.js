@@ -207,21 +207,16 @@ async function getUserById(req, res) {
 }
 
 async function getOwnUserById(req, res) {
-  const userToken = req.cookies?.refreshToken;
-
-  if (!userToken) {
-    return res.status(401).json({ message: "No token provided" });
-  }
-
   try {
-    const decoded = tokenHelper.verifyRefreshToken(userToken);
-    const user = await db("usuarios")
-      .select("id_usuario", "nome", "email", "telefone", "cpf", "enderecos", "pfp_image", "permissoes", "endereco_edit", "ativo")
-      .where({ id_usuario: decoded.userId })
-      .first();
+    const user = await natureza.getUser(req)
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
+    }
+
+    if (!user.permissoes.includes("admin")) {
+      if (user.enderecos) delete user.enderecos.codigo_ibge
+      delete user.endereco_edit
     }
 
     return res.status(200).json(user);
@@ -345,7 +340,7 @@ async function logout(req, res) {
 async function getAllUsers(req, res) {
   try {
     // Return only active users by default
-    const response = await db("usuarios").select("*").where({ ativo: true });
+    const response = await db("usuarios").select("id_usuario", "nome", "email", "telefone", "pfp_image").where({ ativo: true });
     res.status(200).json(response);
   } catch (error) {
     console.error("Error in getAllUsers function controller.usuario.js", error);
@@ -500,8 +495,92 @@ async function changeSchLocation(req, res) {
   }
 }
 
+async function getNavInfo(req, res) {
+  try {
+    const user = await natureza.getUser(req)
+    const navInfo = [
+      { value: "/entidade", label: "Entidade" },
+      { value: "/cidades", label: "Cidades ativas", admin: true },
+      {
+        label: "Campos",
+        options: [
+          { value: "/campos/importar", label: "Popular campos" },
+          { value: "/campos/editar", label: "Editar/Pesquisar campos" },
+          { value: "/analize-campos", label: "Analize Campos" },
+          { value: "/campos/corrigir-lnc", label: "Corrigir lnc" },
+          { value: "/campos/conta-ctb", label: "Valores adicionais CTB" },
+          { value: "/campos/emp", label: "Valores adicionais EMP" },
+        ],
+        admin: true,
+      },
+      { value: "/permitAccess", label: "Permitir usuários", admin: true },
+      { value: "/tabela/teste", label: "Tabelas", admin: true },
+      {
+        options: [
+          { value: "/rubrica", label: "Rubricas" },
+          { value: "/rreo/anexo/1", label: "RREO" },
+          { value: "/rgf/anexo/1", label: "RGF" },
+          { value: "/slide/slide/1", label: "Apresentação Slide" },
+        ],
+        label: "Relatórios Fiscais",
+        admin: true,
+      },
+      {
+        options: [
+          { value: "/candidatos/cadastrar", label: "Cadastrar Candidato" },
+          {
+            value: "/candidatos/analizar-cadastro",
+            label: "Analizar Cadastrados",
+            admin: true,
+          },
+        ],
+        label: "Candidatos",
+      },
+      {
+        options: [
+          { value: "/balancete-contabil", label: "Balancete Contábil" },
+          { value: "/matriz-contabil", label: "Matriz Contábil" },
+          {
+            value: "/analizar-matriz-contabil",
+            label: "Analizar Matriz Contábil",
+            admin: true,
+          },
+        ],
+        label: "Balancete",
+      },
+      {
+        options: [
+          { value: "/analize-campos", label: "Campos" },
+          { value: "/bola", label: "Bolota" },
+        ],
+        label: "Analizar",
+        admin: true,
+      },
+      { value: "/papelfree", label: "PapelFree", },
+    ];
+    if (!user.permissoes.includes("admin")) {
+      const filteredNavInfo = navInfo.filter(item => {
+        if (item.admin) return false;
+        if (item.options) {
+          item.options = item.options.filter(subItem => !subItem.admin);
+        }
+        return true;
+      });
+      return res.status(200).json(filteredNavInfo);
+    }
+    return res.status(200).json(navInfo);
+  } catch (err) {
+    console.error(
+      "Error in getNavInfo function controller.usuario.js",
+      err
+    );
+    return res.status(500).json({ message: "Ocorreu um erro interno no servidor." });
+  }
+}
+
 export default {
   register,
+  getNavInfo,
   login,
   changeSchLocation,
   getUserByEmail,

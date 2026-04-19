@@ -28,7 +28,7 @@ const natureza = {
    * @property {String} estado
    * @property {String} codigo_ibge
    */
-  /**
+  /** 
    * 
    * @typedef {Object} userContent
    * @property {Number} [id_usuario]

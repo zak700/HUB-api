@@ -7,16 +7,9 @@ import natureza from "../helpers/natureza.js";
 
 
 const authenticateToken = async (req, res, next) => {
-  const token = req.cookies.refreshToken;
-  if (!token) {
-    return res.status(401).json({ message: "Token não fornecido" });
-  }
-  try {
-    const decoded = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
-  } catch (err) {
-    console.error("Erro ao verificar o token:", err.message || err);
-    return res.status(403).json({ message: "Token inválido" });
-  }
+  const user = await natureza.getUser(req)
+
+  if (!user) return res.status(401).json({message: "Token inválido ou ausente."})
 
   next();
 };
@@ -77,13 +70,6 @@ const normalUserPerm = async (req, res, next) => {
 
     if (!user || !user.ativo) {
       return res.status(403).json({ message: "Usuário não encontrado ou inativo." });
-    }
-
-    const isAdmin = user.permissoes?.includes("admin");
-
-    if (!isAdmin) {
-      console.warn(`Tentativa de acesso não autorizado: usuário ${user.id_usuario} acessando ${id}`);
-      return res.status(403).json({ message: "Acesso negado." });
     }
 
     req.user = user;

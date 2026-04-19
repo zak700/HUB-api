@@ -1,6 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import { db } from "../database/postgres.js";
 import serviceEntidade from "../services/service.entidade.js";
+import natureza from "../helpers/natureza.js";
 
 async function register(req, res) {
   try {
@@ -170,19 +171,18 @@ async function newRubrica(req, res) {
 
 async function getRubrica(req, res) {
   try {
-    const response = await db("rubricas").select("*");
+    const user = await natureza.getUser(req);
+    const response = await db(`${user.schema}.rubricas`).select("*").first();
 
-    if (response.length === 0)
-      return res.status(404).json({ message: "Nenhuma rubrica cadastrada." });
+    const output = {};
 
-    const sanitized = response.map(({ id, ...rest }) => rest);
+    Object.entries(response).forEach(([key, value]) => {
+      output[key.replace("anexo", "")] = Object.entries(value).map(([k, v]) => ({ label: k, value: v }))
+    });
 
-    for (const key in sanitized[0]) {
-      sanitized[0][key.replace("anexo", "")] = sanitized[0][key];
-      delete sanitized[0][key];
-    }
+    delete output.id;
 
-    res.status(200).json({ response: sanitized[0] });
+    res.status(200).json({ output });
   } catch (error) {
     console.error("Error in getRubrica function controller.entidade.js", error);
     return res
@@ -221,6 +221,34 @@ async function organograma(req, res) {
   }
 }
 
+async function saveRubrica(req, res) {
+  try {
+    const user = await natureza.getUser(req);
+    const info = req.body
+    const toUpload = {};
+    Object.entries(info).forEach(([key, value]) => {
+      toUpload["anexo" + key] = value.reduce((acc, curr) => {
+        acc[curr.label] = curr.value;
+        return acc;
+      }, {});
+    });
+
+    await db(`${user.schema}.rubricas`).update(toUpload);
+
+    return res.status(200).json({
+      message: "Rubrica(s) salva(s) com sucesso!",
+    });
+  } catch (error) {
+    console.error(
+      "Error in organograma function controller.entidade.js",
+      error
+    );
+    return res
+      .status(500)
+      .json({ message: "Ocorreu um erro interno no servidor." });
+  }
+}
+
 export default {
   register,
   getAllEntitys,
@@ -231,4 +259,5 @@ export default {
   newRubrica,
   getRubrica,
   organograma,
+  saveRubrica
 };

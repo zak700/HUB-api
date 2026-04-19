@@ -54,6 +54,7 @@ import controllerMassUpload from "../controllers/campos/controller.massUpload.js
 import controllerCampos from "../controllers/controller.campos.js";
 import controllerCampos_getAll from "../controllers/campos/controller.campos_getAll.js";
 import create_tables from "../controllers/create_tables.js";
+import controllerSchemas from "../controllers/controller.schemas.js";
 
 // --------------------------------------------------
 const storage = multer.memoryStorage(); // Store file in memory
@@ -65,6 +66,19 @@ const upload = multer({
 const routerCampos = Router();
 
 // Rota para a raiz da API
+
+routerCampos.post(
+  "/rubrica-save",
+  validateToken.authenticateToken,
+  validateToken.onlyAdmins,
+  controllerEntidade.saveRubrica
+);
+
+routerCampos.get("/cidades",
+  validateToken.authenticateToken,
+  validateToken.normalUserPerm,
+  controllerSchemas.getAllSchemas
+)
 
 routerCampos.get(
   "/get-campo/:name/:page/:pageSize",
@@ -167,6 +181,8 @@ routerCampos.post(
 );
 
 // ENTIDADE --------------------------------------------------------
+
+
 routerCampos.post(
   "/entidades/register",
   validateToken.authenticateToken,
@@ -212,14 +228,12 @@ routerCampos.get(
 
 routerCampos.get("/entidades/get_safe", controllerEntidade.getAllEntitysSafe);
 
-validateToken.authenticateToken,
+routerCampos.get(
+  "/entidades/usable",
+  validateToken.authenticateToken,
   validateToken.onlyAdmins,
-  routerCampos.get(
-    "/entidades/usable",
-    validateToken.authenticateToken,
-    validateToken.onlyAdmins,
-    controllerEntidade.getUsableEntitys
-  );
+  controllerEntidade.getUsableEntitys
+);
 routerCampos.delete(
   "/entidades/delete/:id",
   validateToken.authenticateToken,
@@ -236,19 +250,14 @@ routerCampos.put(
 // POSTMANAGER --------------------------------------------------------
 routerCampos.get("/posts/:page", controllerPost.getPosts);
 routerCampos.get("/posts/id/:id", controllerPost.getPostById);
-validateToken.authenticateToken,
-  validateToken.onlyAdmins,
+// Identidade do Município----------------------------------------------
 
+routerCampos.post(
+  "/ide/inserir",
   validateToken.authenticateToken,
   validateToken.onlyAdmins,
-  // Identidade do Município----------------------------------------------
-
-  routerCampos.post(
-    "/ide/inserir",
-    validateToken.authenticateToken,
-    validateToken.onlyAdmins,
-    controllerIde.Inserir
-  );
+  controllerIde.Inserir
+);
 routerCampos.post(
   "/ide/post-ide",
   validateToken.authenticateToken,

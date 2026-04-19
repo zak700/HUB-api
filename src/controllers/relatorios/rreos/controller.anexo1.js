@@ -226,7 +226,7 @@ async function getRreoAnexo(req, res) {
     let VI = {};
 
     const getCampo = async (campo, dataType) => {
-      const res = filterOrg(await db(campo).select("*"), orgao, consolidado);
+      const res = filterOrg(await db.withSchema(user.schema).table(campo).select("*"), orgao, consolidado);
       if (dataType === "y") {
         return res.filter((e) => {
           return e.data >= dataToYear(dataI) && e.data <= dataToYear(dataF);
@@ -3373,8 +3373,8 @@ function recInfo(campRec, campRecBI, type, isBI) {
 async function empInfo(dataI, dataF, orgao, consolidado, type, dataType) {
   dataType = dataType || "normal";
   try {
-    const emp = await db("emp").select("*");
-    const anl = await db("anl").select("*");
+    const emp = await db.withSchema(user.schema).table("emp").select("*");
+    const anl = await db.withSchema(user.schema).table("anl").select("*");
 
     const anlRes = anl
       .filter((e) => {
@@ -3537,8 +3537,8 @@ async function empInfo(dataI, dataF, orgao, consolidado, type, dataType) {
 async function lqdInfo(dataI, dataF, orgao, consolidado, type, dataType) {
   dataType = dataType || "normal";
   try {
-    const lqd = await db("lqd").select("*");
-    const alq = await db("alq").select("*");
+    const lqd = await db.withSchema(user.schema).table("lqd").select("*");
+    const alq = await db.withSchema(user.schema).table("alq").select("*");
 
     const alqRes = alq
       .filter((e) => {
@@ -3699,9 +3699,8 @@ async function lqdInfo(dataI, dataF, orgao, consolidado, type, dataType) {
 async function opsInfo(dataI, dataF, orgao, consolidado, type, dataType) {
   dataType = dataType || "normal";
   try {
-    const ops = await db("ops").select("*");
-    const aop = await db("aop").select("*");
-
+    const ops = await db.withSchema(user.schema).table("ops").select("*");
+    const aop = await db.withSchema(user.schema).table("aop").select("*");
     const aopRes = aop
       .filter((e) => {
         let allowed = perm[type];
@@ -3860,7 +3859,7 @@ async function opsInfo(dataI, dataF, orgao, consolidado, type, dataType) {
 async function rspInfo(dataI, dataF, orgao, consolidado, type) {
   const rsp = await filterOrg(
     (
-      await db("rsp").select("*")
+      await db.withSchema(user.schema).table("rsp").select("*")
     ).filter((e) => {
       let returns = true;
 
@@ -3907,7 +3906,7 @@ async function rspInfo(dataI, dataF, orgao, consolidado, type) {
 }
 
 async function aocInfo(dataI, dataF, orgao, consolidado, type) {
-  const aoc = await filterOrg(await db("aoc").select("*"), orgao, consolidado);
+  const aoc = await filterOrg(await db.withSchema(user.schema).table("aoc").select("*"), orgao, consolidado);
   const correctType = [];
   aoc
     .filter((e) => {
@@ -3973,7 +3972,7 @@ async function dspOInfo(dataI, dataF, orgao, consolidado, type) {
   dataI = dataToYear(dataI);
   dataF = dataToYear(dataF);
 
-  const res = (await db("dspO").select("*")).filter((e) => {
+  const res = (await db.withSchema(user.schema).table("dspO").select("*")).filter((e) => {
     return (
       parseInt(e.data) >= parseInt(dataI) &&
       parseInt(e.data) <= parseInt(dataF) &&
