@@ -1,37 +1,35 @@
 import { StatusCodes } from "http-status-codes";
 import { db, query } from "../../database/postgres.js";
 import natureza from "../../helpers/natureza.js";
-import layoutMSC from "./layoutMSC.js";
+import ctaSldInicial from "../campos/addicionalInfo/ctaSldInicial.js";
 
 export default async function matrizContabil(req, res) {
   try {
     const { codOrgao, date, consolidado } = req.body
+    const user = await natureza.getUser(req)
 
     const PO_values = natureza.PO_values
 
-    const layoutMSC_corrected = new Map(
-      Object.entries(layoutMSC).filter(([key, value]) => value?.tipoConta?.toUpperCase() === "A").map(([key, value]) => [key.padEnd(9, "0"), value])
-    )
-
+    const layoutMSC_corrected = (await natureza.getLayoutMSC(natureza.dataToYear(date), user.schema)).filteredTipoConta("A").asMap()
     if (!date) return res.status(StatusCodes.BAD_REQUEST).json({ message: "Ano e mês são campos obrigatórios." });
     if (!codOrgao && !consolidado) return res.status(StatusCodes.BAD_REQUEST).json({ message: "Código do órgão é um campo obrigatório caso não seja consolidado." });
     let response = []
     const allDates = Array.from({ length: parseInt(date.substring(0, 2)) }, (_, i) => String(i + 1).padStart(2, "0") + date.substring(2));
 
     const [lnc, emp, rec, aex, orgao, aoc] = consolidado ? await Promise.all([
-      db("lnc").select("*"),
-      db("emp").select("*"),
-      db("rec").select("*"),
-      db("aex").select("*"),
-      db("orgao").select("*"),
-      db("aoc").select("*")
+      db(user.schema + ".lnc").select("*"),
+      db(user.schema + ".emp").select("*"),
+      db(user.schema + ".rec").select("*"),
+      db(user.schema + ".aex").select("*"),
+      db(user.schema + ".orgao").select("*"),
+      db(user.schema + ".aoc").select("*")
     ]) : await Promise.all([
-      db("lnc").select("*").whereRaw(`content->>'codOrgao' = '${codOrgao.padStart(2, "0")}'`),
-      db("emp").select("*").whereRaw(`content->>'codOrgao' = '${codOrgao.padStart(2, "0")}'`),
-      db("rec").select("*").whereRaw(`content->>'codOrgao' = '${codOrgao.padStart(2, "0")}'`),
-      db("aex").select("*").whereRaw(`content->>'codOrgao' = '${codOrgao.padStart(2, "0")}'`),
-      db("orgao").select("*").whereRaw(`content->>'codOrgao' = '${codOrgao.padStart(2, "0")}'`),
-      db("aoc").select("*").whereRaw(`content->>'codOrgao' = '${codOrgao.padStart(2, "0")}'`),
+      db(user.schema + ".lnc").select("*").whereRaw(`content->>'codOrgao' = '${codOrgao.padStart(2, "0")}'`),
+      db(user.schema + ".emp").select("*").whereRaw(`content->>'codOrgao' = '${codOrgao.padStart(2, "0")}'`),
+      db(user.schema + ".rec").select("*").whereRaw(`content->>'codOrgao' = '${codOrgao.padStart(2, "0")}'`),
+      db(user.schema + ".aex").select("*").whereRaw(`content->>'codOrgao' = '${codOrgao.padStart(2, "0")}'`),
+      db(user.schema + ".orgao").select("*").whereRaw(`content->>'codOrgao' = '${codOrgao.padStart(2, "0")}'`),
+      db(user.schema + ".aoc").select("*").whereRaw(`content->>'codOrgao' = '${codOrgao.padStart(2, "0")}'`),
     ]);
 
     const allContas = {}
@@ -46,7 +44,7 @@ export default async function matrizContabil(req, res) {
           if (tipo11.tipoRegistro !== "11") return;
           const relevant = {
             codOrgao: tipo10.codOrgao,
-            PO: PO_values[tipo10.codOrgao],
+            PO: tipo11.PO,
             tipo: { "1": "beginning_balance", "2": "period_change", "3": "period_change", "4": "period_change" }[tipo10.tipoLancamento],
             cod: tipo11.codConta.substring(0, 9),
             tipoArq: ["00", "REC", "ARE", "AOC", "EMP", "ANL", "LQD", "ALQ", "EXT", "AEX", "OPS", "AOP", "RSP", "CON", "CTB", "TRB"][parseInt(tipo11.tipoArquivoSicom)].toLowerCase(),
@@ -79,11 +77,13 @@ export default async function matrizContabil(req, res) {
           }
           // adicionar ICS
 
-          console.log(relevant.codOrgao)
-
           if (tipo11.subCampos) {
             console.log(tipo11)
             tipo11.subCampos.forEach((e) => {
+              if (!e) {
+                console.log(e, "ERROROROROR")
+                return
+              }
               let contaCopy = { ...conta }
 
               contaCopy.valor = e.valor
@@ -96,10 +96,7 @@ export default async function matrizContabil(req, res) {
                 FR: e.FR,
                 PO: relevant.PO
               }
-
-
               // tudo abaixo prepara para enviar
-
               // cleanup
               Object.entries(contaCopy.IC).forEach(([key, value]) => {
                 if (value === "nan" || !value) {
@@ -116,7 +113,6 @@ export default async function matrizContabil(req, res) {
                   console.log(`Valor ${key} faltando no LNC ${index10}:`, tipo11, contaCopy)
                 }
               })
-
               allContas[relevant.cod]?.push(contaCopy) || (allContas[relevant.cod] = [contaCopy])
             })
             return
@@ -137,12 +133,10 @@ export default async function matrizContabil(req, res) {
 
           // cleanup
           Object.entries(conta.IC).forEach(([key, value]) => {
-            if (value === "nan" || !value) {
-              if (key === "CO") {
-                conta.IC[key] = "0000"
-              }
+            if (value.includes("nan") || !value) {
               delete conta.IC[key]
             }
+            if (key === "CO" && value === "0000") delete conta.IC[key]
           })
 
           // check
@@ -157,6 +151,27 @@ export default async function matrizContabil(req, res) {
 
           allContas[relevant.cod]?.push(conta) || (allContas[relevant.cod] = [conta])
         })
+        // if (d.substring(0,2) === "01") {
+        //   Object.keys(allContas).forEach((codConta) => {
+        //     
+        //     allContas[codConta] = allContas[codConta].filter((e) => e.tipoLancamento !== "beginning_balance")
+        //     const ini = ctaSldInicial.find((e) => e.cod === codConta)
+        //     if (!ini) return
+        //     const ics = {}
+        //     for (let i = 0; i < ini.ic.length; i += 2) {
+        //       ics[ini.ic[i + 1]] = ini.ic[i]
+        //     }
+        //     console.log(allContas[codConta])
+        //     allContas[codConta].push({
+        //       valor: ini.sldInicial,
+        //       IC: ics,
+        //       natureza: ini.naturezaValor,
+        //       tipoLancamento: "beginning_balance",
+        //       has: undefined,
+        //       atributoConta: false,
+        //     })
+        //   })
+        // }
       });
 
       const orgByKey = {}
@@ -164,6 +179,7 @@ export default async function matrizContabil(req, res) {
       Object.entries(allContas).forEach(([key, value]) => {
         orgByKey[key] = {}
         value.forEach((e) => {
+          console.log(e)
           const valKey = Object.entries(e.IC).map(([k, v]) => `${k}:${v}|`).join("") + `${e.tipoLancamento}|` + e.natureza
           if (valKey in orgByKey[key]) {
             orgByKey[key][valKey] = natureza.sumRS([orgByKey[key][valKey], e.valor])[0]
@@ -175,12 +191,26 @@ export default async function matrizContabil(req, res) {
 
       Object.entries(orgByKey).forEach(([key, value]) => {
         Object.entries(value).forEach(([k, v]) => {
-          const separated_IC = Array.from({ length: 12 }, (_, i) => k.split("|").toSpliced(k.split("|").length - 2, 2).flatMap((e) => e.split(":"))[i] || "")
+          const separated_IC = []
           const Eval = k.split("|").toSpliced(0, k.split("|").length - 2)
-          const i = response.push([key, ...separated_IC, v, ...Eval])
+          const ICs = Object.fromEntries(k.split("|").toSpliced(k.split("|").length - 3).map((e) => e.split(":")))
+          const got = layoutMSC_corrected.get(key)
+          got.values.forEach((e) => {
+            if (ICs[e]) {
+              separated_IC.push(e, ICs[e])
+            } else {
+              separated_IC.push(e, "Sem valor")
+            }
+          })
+          const length = separated_IC.length
+          for (let i = 0; i < (12 - length); i++) {
+            separated_IC.push("")
+          }
+          const pushVal = [key, ...separated_IC, v, ...Eval]
+          console.log(pushVal)
+          const i = response.push(pushVal)
         })
       })
-
 
       const hasBeg = {}
       response.forEach((e, i) => {
