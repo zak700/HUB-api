@@ -1,5 +1,4 @@
 import { Router } from "express";
-
 import controllerRreo1 from "../controllers/relatorios/rreos/controller.anexo1.js";
 import controllerRreo2 from "../controllers/relatorios/rreos/controller.anexo2.js";
 import controllerRreo3 from "../controllers/relatorios/rreos/controller.anexo3.js";

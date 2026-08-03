@@ -1,3 +1,4 @@
+import { StatusCodes } from "http-status-codes";
 import { db } from "../../database/postgres.js";
 import natureza from "../../helpers/natureza.js";
 
@@ -22,6 +23,14 @@ async function InserirRecO(req, res) {
   const recO = [];
 
   try {
+    let user
+    if (!req.body.sch) {
+      user = await natureza.getUser(req)
+      const pastRecO = await db(`${user.schema}.recO`)
+      if (pastRecO.find((e) => e.data === data)) {
+        return res.status(StatusCodes.BAD_GATEWAY).json({ message: "recO já adicionado neste ano." })
+      }
+    }
     const lines = await text.split("\n");
 
     let dataHelper = -1;
@@ -69,10 +78,6 @@ async function InserirRecO(req, res) {
         }
       }
     }
-
-    let user
-
-    if (!req.body.sch) user = await natureza.getUser(req)
 
     await db.batchInsert(`${user?.schema || req.body.sch}.recO`, recO, 75);
 

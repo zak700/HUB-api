@@ -1,53 +1,21 @@
-import controllerOrgao from "./controller.orgao.js";
-import controllerIde from "./controller.ide.js";
-import controllerIsi from "./controller.isi.js";
-import controllerUoc from "./controller.uoc.js";
-import controllerRec from "./controller.rec.js";
-import controllerAre from "./controller.are.js";
-import controllerAoc from "./controller.aoc.js";
-import controllerCob from "./controller.cob.js";
-import controllerEmp from "./controller.emp.js";
-import controllerAnl from "./controller.anl.js";
-import controllerEoc from "./controller.eoc.js";
-import controllerLqd from "./controller.lqd.js";
-import controllerAlq from "./controller.alq.js";
-import controllerExt from "./controller.ext.js";
-import controllerAex from "./controller.aex.js";
-import controllerOps from "./controller.ops.js";
-import controllerAop from "./controller.aop.js";
-import controllerRsp from "./controller.rsp.js";
-import controllerCon from "./controller.con.js";
-import controllerCtb from "./controller.ctb.js";
-import controllerTrb from "./controller.trb.js";
-import controllerCvc from "./controller.cvc.js";
-import controllerEcl from "./controller.ecl.js";
-import controllerTfr from "./controller.tfr.js";
-import controllerDfr from "./controller.dfr.js";
-import controllerDic from "./controller.dic.js";
-import controllerDcl from "./controller.dcl.js";
-import controllerPar from "./controller.par.js";
-import controllerPct from "./controller.pct.js";
-import controllerLnc from "./controller.lnc.js";
-import controllerDmr from "./controller.dmr.js";
-import controllerAbl from "./controller.abl.js";
-import controllerRpl from "./controller.rpl.js";
-import controllerHbl from "./controller.hbl.js";
-import controllerJgl from "./controller.jgl.js";
-import controllerHml from "./controller.hml.js";
-import controllerPrl from "./controller.prl.js";
-import controllerArp from "./controller.arp.js";
-import controllerDsi from "./controller.dsi.js";
+
 
 // -----------------------------------------------
 import { db } from "../../database/postgres.js";
 import { StatusCodes } from "http-status-codes";
 import natureza from "../../helpers/natureza.js";
+import controllerCampos from "./controller.campos.js";
 
 async function zipUpload(req, res) {
   try {
+    /**
+     * @typedef {Object} fileContent
+     * @property {String} name
+     * @property {content} content
+     */
+    /** @type {[fileContent]()} */
     const files = req.body.files
     const user = await natureza.getUser(req)
-
     files.forEach((e, i) => {
       files[i].name = e.name.toLowerCase();
     });
@@ -58,6 +26,16 @@ async function zipUpload(req, res) {
 
     orgaoSpecifics.codOrgao = orgao.content.substring(2, 4);
     orgaoSpecifics.tipoOrgao = orgao.content.substring(81, 83);
+    console.log(orgaoSpecifics.codOrgao)
+    const hasTipoOrgao = await db.schema.withSchema(user.schema).hasTable("tipoOrgaos")
+    if (!hasTipoOrgao) {
+      return res.status(StatusCodes.FAILED_DEPENDENCY).json({ message: "Tipo de manejamento de dados não especificado para este orgão, Nenhuma alteração foi feita." })
+    }
+    const tipoOrgao = await db.withSchema(user.schema).table("tipoOrgaos").select("*").first()
+    const ManejOrgao = tipoOrgao.tipos.find((e) => e.cod === orgaoSpecifics.codOrgao)?.tipo
+    if (!ManejOrgao) {
+      return res.status(StatusCodes.FAILED_DEPENDENCY).json({ message: "Tipo de manejamento de dados não especificado para este orgão, Nenhuma alteração foi feita." })
+    }
 
     const checkOrg = (await db.withSchema(user.schema).table("orgao").select("*")).filter(
       (e) =>
@@ -75,586 +53,81 @@ async function zipUpload(req, res) {
           "Este órgão já foi adicionado neste mês. Nenhum dado novo foi incluído.",
       });
     }
+
+
     const codOrgao = orgao.content.slice(2, 4).trim();
+    const data = files.find((f) => f.name.startsWith("lnc")).name.substring(3, 7)
 
-    try {
-      files.forEach((e, i) => {
-        files[i] = {
-          body: {
-            sch: user.schema,
-            name: e.name,
-            text: e.content,
-            data: e.name.substring(3, 7),
-            codOrgao,
-          },
-        };
-      });
+    const order = [
+      "ide",
+      "isi",
+      "uoc",
+      "rec",
+      "are",
+      "aoc",
+      "cob",
+      "emp",
+      "anl",
+      "eoc",
+      "lqd",
+      "alq",
+      "ext",
+      "aex",
+      "ops",
+      "aop",
+      "rsp",
+      "con",
+      "ctb",
+      "trb",
+      "cvc",
+      "ecl",
+      "tfr",
+      "dfr",
+      "dic",
+      "dcl",
+      "par",
+      "pct",
+      "dmr",
+      "abl",
+      "rpl",
+      "hbl",
+      "jgl",
+      "hml",
+      "prl",
+      "arp",
+      "dsi",
+    ]
 
-      const falseRes = {
-        status: function (code) {
-          return {
-            json: (data) => {
-              return { status: code, ...data };
-            },
-          };
-        },
-      };
-
-      try {
-        const allVals = [];
-        console.log("lnc start");
-        console.time("lncTIMER");
-        allVals.push(
-          await controllerLnc.InserirLnc(
-            files.filter((e) => e.body.name.substring(0, 3) === "lnc")[0],
-            falseRes,
-          ),
-        );
-        console.timeEnd("lncTIMER");
-        console.log("orgao start");
-        console.time("orgaoTIMER");
-        allVals.push(
-          await controllerOrgao.InserirOrgao(
-            files.filter((e) => e.body.name.substring(0, 5) === "orgao")[0],
-            falseRes,
-          ),
-        );
-        console.timeEnd("orgaoTIMER");
-        console.log("ide start");
-        console.time("ideTIMER");
-        allVals.push(
-          await controllerIde.InserirIde(
-            files.filter((e) => e.body.name.substring(0, 3) === "ide")[0],
-            falseRes,
-          ),
-        );
-        console.timeEnd("ideTIMER");
-        console.log("isi start");
-        console.time("isiTIMER");
-        allVals.push(
-          await controllerIsi.InserirIsi(
-            files.filter((e) => e.body.name.substring(0, 3) === "isi")[0],
-            falseRes,
-          ),
-        );
-        console.timeEnd("isiTIMER");
-        console.log("uoc start");
-        console.time("uocTIMER");
-        allVals.push(
-          await controllerUoc.InserirUoc(
-            files.filter((e) => e.body.name.substring(0, 3) === "uoc")[0],
-            falseRes,
-          ),
-        );
-        console.timeEnd("uocTIMER");
-        console.log("rec start");
-        console.time("recTIMER");
-        allVals.push(
-          await controllerRec.InserirRec(
-            files.filter((e) => e.body.name.substring(0, 3) === "rec")[0],
-            falseRes,
-          ),
-        );
-        console.timeEnd("recTIMER");
-        console.log("are start");
-        console.time("areTIMER");
-        allVals.push(
-          await controllerAre.InserirAre(
-            files.filter((e) => e.body.name.substring(0, 3) === "are")[0],
-            falseRes,
-          ),
-        );
-        console.timeEnd("areTIMER");
-        console.log("aoc start");
-        console.time("aocTIMER");
-        allVals.push(
-          await controllerAoc.InserirAoc(
-            files.filter((e) => e.body.name.substring(0, 3) === "aoc")[0],
-            falseRes,
-          ),
-        );
-        console.timeEnd("aocTIMER");
-        console.log("cob start");
-        console.time("cobTIMER");
-        allVals.push(
-          await controllerCob.InserirCob(
-            files.filter((e) => e.body.name.substring(0, 3) === "cob")[0],
-            falseRes,
-          ),
-        );
-        console.timeEnd("cobTIMER");
-        console.log("emp start");
-        console.time("empTIMER");
-        allVals.push(
-          await controllerEmp.InserirEmp(
-            files.filter((e) => e.body.name.substring(0, 3) === "emp")[0],
-            falseRes,
-          ),
-        );
-        console.timeEnd("empTIMER");
-        console.log("anl start");
-        console.time("anlTIMER");
-        allVals.push(
-          await controllerAnl.InserirAnl(
-            files.filter((e) => e.body.name.substring(0, 3) === "anl")[0],
-            falseRes,
-          ),
-        );
-        console.timeEnd("anlTIMER");
-        console.log("eoc start");
-        console.time("eocTIMER");
-        allVals.push(
-          await controllerEoc.InserirEoc(
-            files.filter((e) => e.body.name.substring(0, 3) === "eoc")[0],
-            falseRes,
-          ),
-        );
-        console.timeEnd("eocTIMER");
-        console.log("lqd start");
-        console.time("lqdTIMER");
-        allVals.push(
-          await controllerLqd.InserirLqd(
-            files.filter((e) => e.body.name.substring(0, 3) === "lqd")[0],
-            falseRes,
-          ),
-        );
-        console.timeEnd("lqdTIMER");
-        console.log("alq start");
-        console.time("alqTIMER");
-        allVals.push(
-          await controllerAlq.InserirAlq(
-            files.filter((e) => e.body.name.substring(0, 3) === "alq")[0],
-            falseRes,
-          ),
-        );
-        console.timeEnd("alqTIMER");
-        console.log("ext start");
-        console.time("extTIMER");
-        allVals.push(
-          await controllerExt.InserirExt(
-            files.filter((e) => e.body.name.substring(0, 3) === "ext")[0],
-            falseRes,
-          ),
-        );
-        console.timeEnd("extTIMER");
-        console.log("aex start");
-        console.time("aexTIMER");
-        allVals.push(
-          await controllerAex.InserirAex(
-            files.filter((e) => e.body.name.substring(0, 3) === "aex")[0],
-            falseRes,
-          ),
-        );
-        console.timeEnd("aexTIMER");
-        console.log("ops start");
-        console.time("opsTIMER");
-        allVals.push(
-          await controllerOps.InserirOps(
-            files.filter((e) => e.body.name.substring(0, 3) === "ops")[0],
-            falseRes,
-          ),
-        );
-        console.timeEnd("opsTIMER");
-        console.log("aop start");
-        console.time("aopTIMER");
-        allVals.push(
-          await controllerAop.InserirAop(
-            files.filter((e) => e.body.name.substring(0, 3) === "aop")[0],
-            falseRes,
-          ),
-        );
-        console.timeEnd("aopTIMER");
-        console.log("rsp start");
-        console.time("rspTIMER");
-        allVals.push(
-          await controllerRsp.InserirRsp(
-            files.filter((e) => e.body.name.substring(0, 3) === "rsp")[0],
-            falseRes,
-          ),
-        );
-        console.timeEnd("rspTIMER");
-        console.log("con start");
-        console.time("conTIMER");
-        allVals.push(
-          await controllerCon.InserirCon(
-            files.filter((e) => e.body.name.substring(0, 3) === "con")[0],
-            falseRes,
-          ),
-        );
-        console.timeEnd("conTIMER");
-        console.log("ctb start");
-        console.time("ctbTIMER");
-        allVals.push(
-          await controllerCtb.InserirCtb(
-            files.filter((e) => e.body.name.substring(0, 3) === "ctb")[0],
-            falseRes,
-          ),
-        );
-        console.timeEnd("ctbTIMER");
-        console.log("trb start");
-        console.time("trbTIMER");
-        allVals.push(
-          await controllerTrb.InserirTrb(
-            files.filter((e) => e.body.name.substring(0, 3) === "trb")[0],
-            falseRes,
-          ),
-        );
-        console.timeEnd("trbTIMER");
-        console.log("cvc start");
-        console.time("cvcTIMER");
-        allVals.push(
-          await controllerCvc.InserirCvc(
-            files.filter((e) => e.body.name.substring(0, 3) === "cvc")[0],
-            falseRes,
-          ),
-        );
-        console.timeEnd("cvcTIMER");
-        console.log("ecl start");
-        console.time("eclTIMER");
-        allVals.push(
-          await controllerEcl.InserirEcl(
-            files.filter((e) => e.body.name.substring(0, 3) === "ecl")[0],
-            falseRes,
-          ),
-        );
-        console.timeEnd("eclTIMER");
-        console.log("tfr start");
-        console.time("tfrTIMER");
-        allVals.push(
-          await controllerTfr.InserirTfr(
-            files.filter((e) => e.body.name.substring(0, 3) === "tfr")[0],
-            falseRes,
-          ),
-        );
-        console.timeEnd("tfrTIMER");
-        console.log("dfr start");
-        console.time("dfrTIMER");
-        allVals.push(
-          await controllerDfr.InserirDfr(
-            files.filter((e) => e.body.name.substring(0, 3) === "dfr")[0],
-            falseRes,
-          ),
-        );
-        console.timeEnd("dfrTIMER");
-        console.log("dic start");
-        console.time("dicTIMER");
-        allVals.push(
-          await controllerDic.InserirDic(
-            files.filter((e) => e.body.name.substring(0, 3) === "dic")[0],
-            falseRes,
-          ),
-        );
-        console.timeEnd("dicTIMER");
-        console.log("dcl start");
-        console.time("dclTIMER");
-        allVals.push(
-          await controllerDcl.InserirDcl(
-            files.filter((e) => e.body.name.substring(0, 3) === "dcl")[0],
-            falseRes,
-          ),
-        );
-        console.timeEnd("dclTIMER");
-        console.log("par start");
-        console.time("parTIMER");
-        allVals.push(
-          await controllerPar.InserirPar(
-            files.filter((e) => e.body.name.substring(0, 3) === "par")[0],
-            falseRes,
-          ),
-        );
-        console.timeEnd("parTIMER");
-        console.log("pct start");
-        console.time("pctTIMER");
-        allVals.push(
-          await controllerPct.InserirPct(
-            files.filter((e) => e.body.name.substring(0, 3) === "pct")[0],
-            falseRes,
-          ),
-        );
-        console.timeEnd("pctTIMER");
-        console.log("dmr start");
-        console.time("dmrTIMER");
-        allVals.push(
-          await controllerDmr.InserirDmr(
-            files.filter((e) => e.body.name.substring(0, 3) === "dmr")[0],
-            falseRes,
-          ),
-        );
-        console.timeEnd("dmrTIMER");
-        console.log("abl start");
-        console.time("ablTIMER");
-        allVals.push(
-          await controllerAbl.InserirAbl(
-            files.filter((e) => e.body.name.substring(0, 3) === "abl")[0],
-            falseRes,
-          ),
-        );
-        console.timeEnd("ablTIMER");
-        console.log("rpl start");
-        console.time("rplTIMER");
-        allVals.push(
-          await controllerRpl.InserirRpl(
-            files.filter((e) => e.body.name.substring(0, 3) === "rpl")[0],
-            falseRes,
-          ),
-        );
-        console.timeEnd("rplTIMER");
-        console.log("hbl start");
-        console.time("hblTIMER");
-        allVals.push(
-          await controllerHbl.InserirHbl(
-            files.filter((e) => e.body.name.substring(0, 3) === "hbl")[0],
-            falseRes,
-          ),
-        );
-        console.timeEnd("hblTIMER");
-        console.log("jgl start");
-        console.time("jglTIMER");
-        allVals.push(
-          await controllerJgl.InserirJgl(
-            files.filter((e) => e.body.name.substring(0, 3) === "jgl")[0],
-            falseRes,
-          ),
-        );
-        console.timeEnd("jglTIMER");
-        console.log("hml start");
-        console.time("hmlTIMER");
-        allVals.push(
-          await controllerHml.InserirHml(
-            files.filter((e) => e.body.name.substring(0, 3) === "hml")[0],
-            falseRes,
-          ),
-        );
-        console.timeEnd("hmlTIMER");
-        console.log("prl start");
-        console.time("prlTIMER");
-        allVals.push(
-          await controllerPrl.InserirPrl(
-            files.filter((e) => e.body.name.substring(0, 3) === "prl")[0],
-            falseRes,
-          ),
-        );
-        console.timeEnd("prlTIMER");
-        console.log("arp start");
-        console.time("arpTIMER");
-        allVals.push(
-          await controllerArp.InserirArp(
-            files.filter((e) => e.body.name.substring(0, 3) === "arp")[0],
-            falseRes,
-          ),
-        );
-        console.timeEnd("arpTIMER");
-        console.log("dsi start");
-        console.time("dsiTIMER");
-        allVals.push(
-          await controllerDsi.InserirDsi(
-            files.filter((e) => e.body.name.substring(0, 3) === "dsi")[0],
-            falseRes,
-          ),
-        );
-        console.timeEnd("dsiTIMER");
-
-        console.log("lnc valores adicionais start");
-        console.time("lncvalTIMER");
-        const checkLnc = allVals[0].lnc;
-        const lncVals = files.find(
-          (e) => e.body.name.substring(0, 3) === "lnc",
-        ).body;
-        const lncRes = await controllerLnc.addValtoLnc(
-          checkLnc?.flat(),
-          codOrgao,
-          lncVals.data,
-          user
-        );
-        console.timeEnd("lncvalTIMER");
-        if (!lncRes)
-          res.status(500).json({ message: "Erro ao atualizar dados do lnc" });
-
-        // checkForErrors(allVals)
-        const errorInfo = [];
-        allVals.forEach((e) => {
-          if (e && e.status && e.status !== StatusCodes.OK) {
-            errorInfo.push(e);
-          }
-        });
-        if (errorInfo.length > 0) {
-          await db(`${user.schema}.orgao`)
-            .where(
-              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-            ).del()
-          await db(`${user.schema}.ide`)
-            .where(
-              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-            ).del()
-          await db(`${user.schema}.isi`)
-            .where(
-              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-            ).del()
-          await db(`${user.schema}.uoc`)
-            .where(
-              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-            ).del()
-          await db(`${user.schema}.rec`)
-            .where(
-              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-            ).del()
-          await db(`${user.schema}.are`)
-            .where(
-              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-            ).del()
-          await db(`${user.schema}.aoc`)
-            .where(
-              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-            ).del()
-          await db(`${user.schema}.cob`)
-            .where(
-              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-            ).del()
-          await db(`${user.schema}.emp`)
-            .where(
-              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-            ).del()
-          await db(`${user.schema}.anl`)
-            .where(
-              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-            ).del()
-          await db(`${user.schema}.eoc`)
-            .where(
-              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-            ).del()
-          await db(`${user.schema}.lqd`)
-            .where(
-              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-            ).del()
-          await db(`${user.schema}.alq`)
-            .where(
-              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-            ).del()
-          await db(`${user.schema}.ext`)
-            .where(
-              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-            ).del()
-          await db(`${user.schema}.aex`)
-            .where(
-              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-            ).del()
-          await db(`${user.schema}.ops`)
-            .where(
-              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-            ).del()
-          await db(`${user.schema}.aop`)
-            .where(
-              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-            ).del()
-          await db(`${user.schema}.rsp`)
-            .where(
-              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-            ).del()
-          await db(`${user.schema}.con`)
-            .where(
-              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-            ).del()
-          await db(`${user.schema}.ctb`)
-            .where(
-              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-            ).del()
-          await db(`${user.schema}.trb`)
-            .where(
-              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-            ).del()
-          await db(`${user.schema}.cvc`)
-            .where(
-              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-            ).del()
-          await db(`${user.schema}.ecl`)
-            .where(
-              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-            ).del()
-          await db(`${user.schema}.tfr`)
-            .where(
-              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-            ).del()
-          await db(`${user.schema}.dfr`)
-            .where(
-              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-            ).del()
-          await db(`${user.schema}.dic`)
-            .where(
-              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-            ).del()
-          await db(`${user.schema}.dcl`)
-            .where(
-              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-            ).del()
-          await db(`${user.schema}.par`)
-            .where(
-              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-            ).del()
-          await db(`${user.schema}.pct`)
-            .where(
-              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-            ).del()
-          await db(`${user.schema}.lnc`)
-            .where(
-              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-            ).del()
-          await db(`${user.schema}.dmr`)
-            .where(
-              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-            ).del()
-          await db(`${user.schema}.abl`)
-            .where(
-              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-            ).del()
-          await db(`${user.schema}.rpl`)
-            .where(
-              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-            ).del()
-          await db(`${user.schema}.hbl`)
-            .where(
-              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-            ).del()
-          await db(`${user.schema}.jgl`)
-            .where(
-              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-            ).del()
-          await db(`${user.schema}.hml`)
-            .where(
-              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-            ).del()
-          await db(`${user.schema}.prl`)
-            .where(
-              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-            ).del()
-          await db(`${user.schema}.arp`)
-            .where(
-              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-            ).del()
-          await db(`${user.schema}.dsi`)
-            .where(
-              db.raw("content->>'codOrgao' = ?", [orgaoSpecifics.codOrgao]),
-            )
-            .del()
-          if (res.headersSent) return
-          return res.status(StatusCodes.BAD_REQUEST).json({
-            message: `Erros: ${errorInfo.map((e) => e.message).join(", ")}`,
-            errors: errorInfo,
-          });
-        }
-      } catch (error) {
-        console.error("Erro ao inserir dados", error);
-        throw error;
-      }
-      if (res.headersSent) return
-      return res
-        .status(StatusCodes.OK)
-        .json({ message: "ORGAOOO INNNSERRRIIIGOOOOOO" });
-    } catch (error) {
-      if (res.headersSent) return
-      return res
-        .status(StatusCodes.INTERNAL_SERVER_ERROR)
-        .json({ message: "erro ao inserir data" });
+    const defaultInfo = {
+      data,
+      sch: user.schema,
+      codOrgao
+      
     }
+
+    const org = await controllerCampos.inserir.orgao({
+      text: files.find((e) => e.name.startsWith("orgao")).content,
+      ...defaultInfo
+    })
+
+    const lnc = await controllerCampos.inserir.lnc({
+      text: files.find((e) => e.name.startsWith("lnc")).content,
+      ...defaultInfo
+    })
+
+    if (!lnc) return res.status(StatusCodes.FAILED_DEPENDENCY).json({ message: "Não foi possível enviar o LNC." })
+
+    for (const index in order) {
+      const name = order[index]
+      const camp = await controllerCampos.inserir[name]({
+        text: files.find((e) => e.name.startsWith(name)).content,
+        ...defaultInfo,
+      })
+    }
+
+    await controllerCampos.special.addValtoLnc(lnc, codOrgao, data, user, ManejOrgao)
+
+    return res.status(200).json({ message: "OK" })
   } catch (error) {
     console.error(
       "error from zipUpload function from /controllers/controller.massUpload.js",

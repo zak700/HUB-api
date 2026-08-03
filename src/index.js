@@ -8,6 +8,7 @@ import { errorLogger } from "./utils/logger.js"; // Middleware de log de erro
 import cookieParser from "cookie-parser";
 import papelFreeRouter from "./routers/papelFreeRouter.js";
 import usersRouter from "./routers/usersRouter.js";
+import hubEleicoes from "./routers/hubEleicoes.js";
 
 dotenv.config();
 
@@ -24,7 +25,7 @@ app.use(cookieParser()); // Middleware para analisar cookies
 // Configuração do CORS (permitir apenas domínios específicos)
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://hubmain.com.br", "https://www.hubmain.com.br"],
+    origin: ["http://localhost:2002", "https://hubmain.com.br", "https://www.hubmain.com.br"],
     credentials: true, // se for usar cookies/autenticação no futuro
   })
 );
@@ -34,6 +35,7 @@ app.use(routerCampos);
 app.use(routerRelatorios);
 app.use(papelFreeRouter);
 app.use(usersRouter);
+app.use(hubEleicoes);
 
 // Middleware para log de erros (caso o código de erro não tenha sido tratado em rotas específicas)
 app.use(errorLogger);

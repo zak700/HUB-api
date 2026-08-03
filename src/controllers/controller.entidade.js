@@ -30,7 +30,7 @@ async function getAllEntitys(req, res) {
   } catch (error) {
     console.error(
       "Error in getAllUsers function controller.entidade.js",
-      error
+      error,
     );
     return res
       .status(500)
@@ -43,13 +43,13 @@ async function getUsableEntitys(req, res) {
     const result = await db("entidade").select(
       "entidade_nome",
       "id",
-      "id_usuario_autorizado"
+      "id_usuario_autorizado",
     );
     res.status(200).json(result);
   } catch (error) {
     console.error(
       "Error in getAllUsers function controller.entidade.js",
-      error
+      error,
     );
     return res
       .status(500)
@@ -68,7 +68,7 @@ async function deleteEntity(req, res) {
   } catch (error) {
     console.error(
       "Error in deleteEntity function controller.entidade.js",
-      error
+      error,
     );
     return res
       .status(500)
@@ -116,7 +116,7 @@ async function getAllEntitysSafe(req, res) {
   } catch (error) {
     console.error(
       "Error in getAllUsers function controller.entidade.js",
-      error
+      error,
     );
     return res
       .status(500)
@@ -172,12 +172,40 @@ async function newRubrica(req, res) {
 async function getRubrica(req, res) {
   try {
     const user = await natureza.getUser(req);
-    const response = await db(`${user.schema}.rubricas`).select("*").first();
+    let response = await db
+      .withSchema(user.schema)
+      .table("rubricas")
+      .select("*")
+      .first();
+    if (!response)
+      response = (
+        await db
+          .withSchema(user.schema)
+          .table("rubricas")
+          .insert({
+            anexo1: {},
+            anexo2: {},
+            anexo3: {},
+            anexo4: {},
+            anexo6: {},
+            anexo7: {},
+            anexo8: {},
+            anexo9: {},
+            anexo10: {},
+            anexo11: {},
+            anexo12: {},
+            anexo13: {},
+            anexo14: {},
+          })
+          .returning("*")
+      )[0];
 
     const output = {};
 
     Object.entries(response).forEach(([key, value]) => {
-      output[key.replace("anexo", "")] = Object.entries(value).map(([k, v]) => ({ label: k, value: v }))
+      output[key.replace("anexo", "")] = Object.entries(value).map(
+        ([k, v]) => ({ label: k, value: v }),
+      );
     });
 
     delete output.id;
@@ -213,7 +241,7 @@ async function organograma(req, res) {
   } catch (error) {
     console.error(
       "Error in organograma function controller.entidade.js",
-      error
+      error,
     );
     return res
       .status(500)
@@ -224,7 +252,7 @@ async function organograma(req, res) {
 async function saveRubrica(req, res) {
   try {
     const user = await natureza.getUser(req);
-    const info = req.body
+    const info = req.body;
     const toUpload = {};
     Object.entries(info).forEach(([key, value]) => {
       toUpload["anexo" + key] = value.reduce((acc, curr) => {
@@ -241,7 +269,7 @@ async function saveRubrica(req, res) {
   } catch (error) {
     console.error(
       "Error in organograma function controller.entidade.js",
-      error
+      error,
     );
     return res
       .status(500)
@@ -259,5 +287,5 @@ export default {
   newRubrica,
   getRubrica,
   organograma,
-  saveRubrica
+  saveRubrica,
 };

@@ -2,13 +2,13 @@ import jwt from "jsonwebtoken";
 
 function generateToken(userId) {
   return jwt.sign({ userId }, process.env.ACCESS_TOKEN_SECRET, {
-    expiresIn: "20s", 
+    expiresIn: "2m", 
   });
 }
 
 function generateRefreshToken(userId) {
   return jwt.sign({ userId }, process.env.REFRESH_TOKEN_SECRET, {
-    expiresIn: "1m",
+    expiresIn: "5m",
   });
 }
 

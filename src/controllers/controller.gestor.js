@@ -52,18 +52,15 @@ async function InserirGestor(req, res) {
       const email_gestor = text.slice(244, 324);
       const escolaridade_gestor = text.slice(324, 326);
       const nrosequencial_gestor = text.slice(384, 390);
-
-      
-
       /*
-[
-{10},
-{11},
-{12},
-{13},
-{14}
-] 
-*/
+      [
+        {10},
+        {11},
+        {12},
+        {13},
+        {14}
+      ]
+      */
 
       const response = await db("gestor")
         .insert({

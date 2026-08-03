@@ -1,18 +1,20 @@
 import natureza from "../../helpers/natureza.js"
-import layoutMSC from "./layoutMSC.js"
 import { StatusCodes } from "http-status-codes"
 import { db } from "../../database/postgres.js"
 
 export default async function balanceteContabil(req, res) {
   const { lancamento, codOrgao, date } = req.params
+  const user = await natureza.getUser(req)
   try {
     if (lancamento === "N") {
-      const lnc = (await db("lnc").select("*")).filter(
+      const lnc = (await db.withSchema(user.schema).table("lnc").select("*")).filter(
         (lnc) => lnc.content.codOrgao === codOrgao.padStart(2, "0")
       )
       const response = []
       const datesToSee = Array.from({ length: parseInt(date.substring(0, 2)) }, (_, i) => String(i + 1).padStart(2, "0") + date.substring(2))
-      const layoutMSC_map = new Map(Object.keys(layoutMSC).map((e) => ([e.padStart(9, "0"), layoutMSC[e]])))
+      const layout = await natureza.getLayoutMSC(natureza.dataToYear(date), user.schema)
+      const layoutMSC = layout.asJson()
+      const layoutMSC_map = layout.asMap()
       const layoutMSC_sinteticas_map = new Map(Object.keys(layoutMSC).filter((e) => layoutMSC[e].tipoConta?.toUpperCase() === "S").map((e) => ([e.replace(/0*$/, ""), layoutMSC[e]])))
       const contas = {}
       const template = {
@@ -34,7 +36,6 @@ export default async function balanceteContabil(req, res) {
             allSum[lnc11.natLancamento] = natureza.sumRS([allSum[lnc11.natLancamento], lnc11.valor])[0]
           })
         })
-        console.log(`Total Lançado na data ${date} (${filteredLnc.length} arquivos): R$ ${allSum.D}, ${allSum.C}`)
 
         if (filteredLnc.length === 0) res.status(404).json({ message: "Erro: Campo LNC não importado na data: " + date })
         filteredLnc.forEach((lnc10) => {
@@ -67,7 +68,7 @@ export default async function balanceteContabil(req, res) {
               const mapped = layoutMSC_map.get(cod)
               if (date.startsWith("01")) {
                 const values = {
-                  titulo: mapped.titulo || "",
+                  titulo: mapped.title || "",
                   s_a: mapped.tipoConta || "",
                   f_p: { 1: "F", 2: "P" }[lnc11.atributoConta],
                   saldo_anterior: lnc10.content.tipoLancamento !== "1"
@@ -109,8 +110,6 @@ export default async function balanceteContabil(req, res) {
         }
       })
 
-      console.log(contas)
-
       const contasKeys = Object.keys(contas)
 
       Array.from(layoutMSC_sinteticas_map.keys()).forEach((cod) => {
@@ -118,7 +117,7 @@ export default async function balanceteContabil(req, res) {
         const fetchedContas = contasKeys.filter((key) => key.startsWith(cod))
         if (!fetchedContas.length) return
         const contaMSC = layoutMSC_sinteticas_map.get(cod)
-        toEnv.titulo = contaMSC.titulo
+        toEnv.titulo = contaMSC.title
         toEnv.s_a = contaMSC.tipoConta
         fetchedContas.forEach((key) => {
           toEnv.D = natureza.sumRS([toEnv.D, contas[key].D])[0]
@@ -130,22 +129,27 @@ export default async function balanceteContabil(req, res) {
       })
       response.push(...Object.keys(contas))
       response.sort()
-      const output = response.map((key) => ([
-        key,
-        contas[key].titulo,
-        contas[key].s_a,
-        contas[key].f_p,
-        contas[key].saldo_anterior.replace("-", ""),
-        contas[key].saldo_anterior[0] === "-" ? "C" : "D",
-        contas[key].D,
-        contas[key].C,
-        ((contas[key].saldo_anterior[0] === "-" ? "C" : "D") === "D"
-          ? natureza.subRS([natureza.sumRS([contas[key].saldo_anterior, contas[key].D])[0], contas[key].C])[0]
-          : natureza.subRS([natureza.sumRS([contas[key].saldo_anterior.replace("-", ""), contas[key].C])[0], contas[key].D])[0]).replace("-", ""),
-        ((contas[key].saldo_anterior[0] === "-" ? "C" : "D") === "D"
-          ? natureza.subRS([natureza.sumRS([contas[key].saldo_anterior, contas[key].D])[0], contas[key].C])[0]
-          : natureza.subRS([natureza.sumRS([contas[key].saldo_anterior.replace("-", ""), contas[key].C])[0], contas[key].D])[0])[0] === "-" ? "C" : "D"
-      ]))
+      const output = response.map((key) => {
+
+        console.log(contas[key])
+        const saldo_anterior = parseInt(contas[key].saldo_anterior.replaceAll(".", "").replaceAll(",", ""))
+        const D = parseInt(contas[key].D.replaceAll(".", "").replaceAll(",", ""))
+        const C = parseInt(contas[key].C.replaceAll(".", "").replaceAll(",", ""))
+        const lastV = natureza.toRS((saldo_anterior + D - C) / 100)
+
+        return [
+          key,
+          contas[key].titulo,
+          contas[key].s_a,
+          contas[key].f_p,
+          contas[key].saldo_anterior.replace("-", ""),
+          contas[key].saldo_anterior[0] === "-" ? "C" : "D",
+          contas[key].D,
+          contas[key].C,
+          lastV.replaceAll("-", ""),
+          lastV.includes("-") ? "C" : "D"
+        ]
+      })
 
       return res.status(StatusCodes.OK).json({ response: output })
     }

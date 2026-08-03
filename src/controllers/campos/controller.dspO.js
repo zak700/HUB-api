@@ -1,5 +1,6 @@
 import { db } from "../../database/postgres.js";
 import natureza from "../../helpers/natureza.js";
+import StatusCodes from "http-status-codes"
 
 async function Inserir(req, res) {
   try {
@@ -22,6 +23,14 @@ async function InserirDspO(req, res) {
   const dspO = [];
 
   try {
+    let user
+    if (!req.body.sch) {
+      user = await natureza.getUser(req)
+      const pastDspO = await db(`${user.schema}.dspO`)
+      if (pastDspO.find((e) => e.data === data)) {
+        return res.status(StatusCodes.BAD_GATEWAY).json({message: "dspO já adicionado neste ano."})
+      }
+    }
     const lines = await text.split("\n");
 
     let dataHelper = -1;
@@ -70,22 +79,12 @@ async function InserirDspO(req, res) {
               valorFonte: line.slice(28, 43).trim(),
               valorFonteImpositiva: line.slice(43, 58).trim(),
               nroSequencial: line.slice(58, 64).trim(),
-              line,
-              // adicionais
-              elementoDespesaMSC: line.slice(19, 25).trim(),
-              subElementoMSC: "00",
-              codFontRecursosMSC: "nan",
-              codAEO: "nan",
-              ficha: "nan",
+              line
             });
           }
         }
       }
     }
-
-    let user
-
-    if (!req.body.sch) user = await natureza.getUser(req)
 
     await db.batchInsert(`${user?.schema || req.body.sch}.dspO`, dspO, 75);
 

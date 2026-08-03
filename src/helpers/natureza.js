@@ -22,6 +22,55 @@ const natureza = {
     16: "10131",
   },
 
+  getLayoutMSC: async function (dataY, schema) {
+    const as = (obj) => {
+      return {
+        asMap: () => new Map(Object.entries(obj)),
+        asJson: () => obj,
+      }
+    }
+    const row = await db.withSchema(schema)
+      .table("layoutMSC")
+      .select("layout")
+      .where({ data: dataY })
+      .first();
+
+    const layout = row?.layout || {};
+    const entries = Object.entries(layout);
+    return {
+      ...as(layout),
+      filteredTipoConta: (tipoConta) => as(Object.fromEntries(entries.filter(([_, value]) => value && value.tipoConta === tipoConta)))
+    }
+  },
+
+  getLncVerSum: function (allLnc) {
+    const output = {
+      1: { C: "0,00", D: "0,00", f: "0,00" },
+      2: { C: "0,00", D: "0,00", f: "0,00" },
+      3: { C: "0,00", D: "0,00", f: "0,00" },
+      4: { C: "0,00", D: "0,00", f: "0,00" },
+      5: { C: "0,00", D: "0,00", f: "0,00" },
+      6: { C: "0,00", D: "0,00", f: "0,00" },
+      7: { C: "0,00", D: "0,00", f: "0,00" },
+      8: { C: "0,00", D: "0,00", f: "0,00" },
+      9: { C: "0,00", D: "0,00", f: "0,00" },
+      final: { C: "0,00", D: "0,00", f: "0,00" },
+    }
+    allLnc.forEach(({ content }) => {
+      content.content.forEach(({ natLancamento, valor, codConta }) => {
+        output[codConta.substring(0, 1)][natLancamento] = natureza.sumRS([output[codConta.substring(0, 1)][natLancamento], valor])[0]
+        output[codConta.substring(0, 1)].f = natLancamento === "D"
+        ? natureza.sumRS([output[codConta.substring(0, 1)].f, valor])[0]
+        : natureza.subRS([output[codConta.substring(0, 1)].f, valor])[0]
+        output.final[natLancamento] = natureza.sumRS([output.final[natLancamento], valor])[0]
+        output.final.f = natLancamento === "D"
+        ? natureza.sumRS([output.final.f, valor])[0]
+        : natureza.subRS([output.final.f, valor])[0]
+      })
+    })
+    return output
+  },
+
   /**
    * @typedef {Object} enderecoType
    * @property {String} cidade
@@ -51,7 +100,7 @@ const natureza = {
     const userToken = req.cookies?.refreshToken;
 
     if (!userToken) {
-      return res.status(401).json({ message: "No token provided" });
+      return null
     }
 
     try {
@@ -147,6 +196,7 @@ const natureza = {
   },
 
   toRS: function (string) {
+    string = String(string)
     const dots = (value) => {
       value = String(value);
       if (value.length <= 3) return value;
@@ -317,14 +367,14 @@ const natureza = {
       consolidado,
     );
     if (dataType === "m" || dataType === "y") {
-      console.log(
+      /*console.log(
         (consolidado !== "false"
           ? ""
           : `content ->> 'codOrgao' = '${orgao.substring(2, "0")}' AND `) +
         this.fromToData(dataI, dataF, dataType)
           .map((e) => `data = '${e}'`)
           .join(" OR "),
-      );
+      );*/
       return await db(campo)
         .select("*")
         .whereRaw(
@@ -505,7 +555,13 @@ const natureza = {
     }
     return output;
   },
-
+  /**
+   * 
+   * @param {String} data
+   * @description - transforma datas de MMAA em AAAA.  
+   * - ex: 0125 retorna 2025
+   * @returns {String}
+   */
   dataToYear: function (data) {
     data = String(data).substring(2, 4);
     const date = new Date().getFullYear();
